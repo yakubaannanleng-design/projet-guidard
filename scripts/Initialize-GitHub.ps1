@@ -30,7 +30,7 @@ if (Test-Path -LiteralPath (Join-Path $projectRoot ".git")) {
   throw "Ce dossier contient déjà un dépôt Git. Initialisation annulée pour préserver son historique."
 }
 
-$clonePath = Join-Path $env:TEMP ("projet-guidard-init-" + [guid]::NewGuid().ToString("N"))
+$clonePath = Join-Path (Split-Path -Parent $projectRoot) (".projet-guidard-init-" + [guid]::NewGuid().ToString("N"))
 $clone = & $gitExecutable clone $RemoteUrl $clonePath 2>&1
 if ($LASTEXITCODE -ne 0) {
   throw "Clonage du dépôt privé impossible. Vérifie la connexion à GitHub et réessaie. Détails : $($clone -join [Environment]::NewLine)"
@@ -80,6 +80,14 @@ if ($LASTEXITCODE -ne 0) {
   throw "Envoi initial vers GitHub impossible. La copie locale n’a pas encore été reliée au dépôt. Détails : $($push -join [Environment]::NewLine)"
 }
 
-Move-Item -LiteralPath (Join-Path $clonePath ".git") -Destination (Join-Path $projectRoot ".git") -ErrorAction Stop
+$metadataSource = Join-Path $clonePath ".git"
+$metadataDestination = Join-Path $projectRoot ".git"
+Move-Item -LiteralPath $metadataSource -Destination $metadataDestination -ErrorAction Stop
+$rootCheck = & $gitExecutable -C $projectRoot rev-parse --show-toplevel 2>&1
+if ($LASTEXITCODE -ne 0 -or [IO.Path]::GetFullPath(($rootCheck | Out-String).Trim()) -ne [IO.Path]::GetFullPath($projectRoot)) {
+  throw "Les fichiers du depot Git n'ont pas ete relies au dossier du projet."
+}
+Remove-Item -LiteralPath $clonePath -Recurse -Force -ErrorAction Stop
+
 Write-Output "Dépôt GitHub relié. Les fichiers de l’application et son historique sont synchronisés."
 Write-Output "Ouvre ce dossier comme espace de travail VS Code et autorise la tâche « Guidard : synchronisation automatique »."
