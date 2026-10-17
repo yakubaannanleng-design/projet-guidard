@@ -18,6 +18,9 @@ Ouvre `guidar-final.html` dans un navigateur. L’application fonctionne hors li
 - `js/keyboard.js` : clavier de caractères spéciaux et copie.
 - `js/interactions.js` : notifications, gestes tactiles et raccourcis clavier.
 - `js/init.js` : démarrage de l’application.
+- `scripts/Initialize-GitHub.ps1` : prépare une fois le dossier pour son dépôt privé GitHub.
+- `scripts/Watch-And-Sync.ps1` : sauvegarde les changements sur GitHub après une minute sans modification.
+- `.vscode/tasks.json` : lance le surveillant lorsque ce dossier est ouvert dans VS Code.
 
 ## Modifier une entrée ou ajouter du contenu
 
@@ -39,3 +42,19 @@ Pour éviter de désynchroniser les enregistrements existants, ne réordonne pas
 ## Fonctionnement hors ligne
 
 Les scripts sont chargés dans un ordre explicite par `guidar-final.html`. Ils utilisent des balises `<script>` classiques afin de rester compatibles avec l’ouverture directe d’un fichier local. Ne les remplace pas par des modules JavaScript `type="module"` sans mettre également en place un serveur local.
+
+## Sauvegarde automatique sur GitHub
+
+Le dépôt distant est privé : seuls les comptes autorisés peuvent consulter ses fichiers. La sauvegarde automatique s’applique quand ce dossier de projet est ouvert comme dossier de travail dans VS Code.
+
+1. Installe Git for Windows si nécessaire et connecte Git à ton compte GitHub quand le navigateur le demande. Les identifiants restent gérés par Git Credential Manager ; ne les écris pas dans les scripts ou dans les fichiers du projet.
+2. Dans le terminal PowerShell de VS Code, lance une seule fois :
+
+   ```powershell
+   .\scripts\Initialize-GitHub.ps1
+   ```
+
+3. Rouvre le dossier du projet dans VS Code et accepte le lancement de la tâche automatique si VS Code le demande.
+4. Quand des fichiers sont modifiés et enregistrés, le surveillant crée une version puis l’envoie au dépôt après 60 secondes sans changement. Le transfert des dossiers audio et images peut nécessiter davantage de temps selon la connexion.
+
+La tâche n’efface ni ne télécharge automatiquement les changements distants. Une erreur Git ou réseau est affichée dans son terminal ; les envois échoués sont retentés. Ne modifie pas la version GitHub depuis une autre machine avant d’avoir synchronisé cette copie locale. Ne ferme pas VS Code avant que le message de synchronisation terminée apparaisse.
