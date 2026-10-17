@@ -125,33 +125,38 @@ function melangerTableau(elements) {
   }
   return resultat;
 }
-function ouvrirQuiz(leconIndex = -1) {
+function ouvrirQuiz() {
   if (document.getElementById("menu").style.display !== "flex") openMenu();
   quizSession = null;
-  const optionsLecons = LECONS.map((lecon, index) =>
-    '<option value="' + index + '" ' + (leconIndex === index ? "selected" : "") + '>' +
-    echapperHtml(lecon.titre) + '</option>'
-  ).join("");
-  afficherMenu("Quiz Guidar", '<div class="module-note"><strong>À toi de jouer !</strong><br>Lis la traduction française et choisis le mot Guidar correspondant. Les réponses proviennent des leçons actuellement intégrées.</div>' +
-    '<label class="menu-section-title" for="quiz-lesson">Choisir un parcours</label>' +
-    '<select id="quiz-lesson" class="resource-search"><option value="-1" ' + (leconIndex === -1 ? "selected" : "") + '>Toutes les leçons</option>' + optionsLecons + '</select>' +
-    '<div class="quiz-notice">Certaines graphies et traductions attendent encore la validation d’un spécialiste.</div>' +
-    '<button type="button" class="quiz-primary" onclick="demarrerQuiz()">Commencer le quiz <span aria-hidden="true">→</span></button>');
+  const toutesEntrees = obtenirEntreesQuiz(-1);
+  const nombreToutesQuestions = Math.min(10, toutesEntrees.length);
+  const cartes = ['<button type="button" class="quiz-category" ' +
+    (toutesEntrees.length < 4 ? "disabled" : 'onclick="demarrerQuiz(-1)"') +
+    '><span class="quiz-category-icon" aria-hidden="true">🌍</span><span class="quiz-category-copy"><span class="quiz-category-title">Toutes les leçons</span><span class="quiz-category-meta">' +
+    (toutesEntrees.length < 4 ? "Quiz bientôt disponible" : nombreToutesQuestions + " questions") +
+    '</span></span></button>'];
+  LECONS.forEach((lecon, index) => {
+    const nombreEntrees = obtenirEntreesQuiz(index).length;
+    const disponible = nombreEntrees >= 4;
+    cartes.push('<button type="button" class="quiz-category" ' +
+      (disponible ? 'onclick="demarrerQuiz(' + index + ')"' : "disabled") +
+      '><span class="quiz-category-icon" aria-hidden="true">' + echapperHtml(lecon.icone || "📘") +
+      '</span><span class="quiz-category-copy"><span class="quiz-category-title">' + echapperHtml(lecon.titre) +
+      '</span><span class="quiz-category-meta">' +
+      (disponible ? Math.min(10, nombreEntrees) + " questions" : "Quiz bientôt disponible") +
+      '</span></span></button>');
+  });
+  afficherMenu("Quiz par leçon", '<div class="module-note"><strong>Choisis une catégorie pour jouer.</strong><br>Réponds aux questions en sélectionnant le mot Guidar qui correspond à sa traduction française.</div>' +
+    '<h2 class="menu-section-title">Catégories de quiz</h2><div class="quiz-categories">' + cartes.join("") + '</div>' +
+    '<div class="quiz-notice">Les questions utilisent les contenus actuels des leçons, qui doivent encore être validés par un spécialiste.</div>');
 }
-function demarrerQuiz() {
-  const selecteur = document.getElementById("quiz-lesson");
-  const choixLecon = selecteur ? Number(selecteur.value) : -1;
-  if (!Number.isInteger(choixLecon) || choixLecon < -1 || choixLecon >= LECONS.length) {
-    console.error("Parcours de quiz invalide.", choixLecon);
-    toast("Impossible de démarrer ce quiz. Choisis un parcours valide.");
-    return;
-  }
+function obtenirEntreesQuiz(choixLecon) {
   const source = choixLecon === -1
     ? LECONS.flatMap((lecon, leconIndex) => lecon.mots.map(mot => ({ mot, leconIndex })))
     : LECONS[choixLecon].mots.map(mot => ({ mot, leconIndex: choixLecon }));
   const vusGuidar = new Set();
   const vuesTraductions = new Set();
-  const entrees = source.filter(({ mot }) => {
+  return source.filter(({ mot }) => {
     if (!mot.g || !mot.f) return false;
     const guidar = mot.g.trim().toLocaleLowerCase("fr");
     const francais = mot.f.trim().toLocaleLowerCase("fr");
@@ -160,8 +165,16 @@ function demarrerQuiz() {
     vuesTraductions.add(francais);
     return true;
   });
+}
+function demarrerQuiz(choixLecon = -1) {
+  if (!Number.isInteger(choixLecon) || choixLecon < -1 || choixLecon >= LECONS.length) {
+    console.error("Parcours de quiz invalide.", choixLecon);
+    toast("Impossible de démarrer ce quiz. Choisis un parcours valide.");
+    return;
+  }
+  const entrees = obtenirEntreesQuiz(choixLecon);
   if (entrees.length < 4) {
-    afficherMenu("Quiz indisponible", '<div class="module-note">Ce parcours ne contient pas encore assez de réponses distinctes pour proposer un quiz fiable. Essaie toutes les leçons ou choisis un autre parcours.</div><button type="button" class="resource-back" onclick="ouvrirQuiz(' + choixLecon + ')">Choisir un autre parcours</button>');
+    afficherMenu("Quiz indisponible", '<div class="module-note">Cette catégorie ne contient pas encore assez de réponses distinctes pour proposer un quiz fiable.</div><button type="button" class="resource-back" onclick="ouvrirQuiz()">Choisir une autre catégorie</button>');
     return;
   }
   const questions = melangerTableau(entrees).map(({ mot, leconIndex }) => {
@@ -192,7 +205,7 @@ function afficherQuestionQuiz() {
     const score = quizSession.score;
     const message = score === total ? "Excellent, sans faute !" : score >= Math.ceil(total * 0.7) ? "Bravo, tu progresses bien !" : "Continue à t’entraîner, tu vas y arriver !";
     afficherMenu("Quiz terminé", '<div class="quiz-score"><span class="quiz-score-value">' + score + ' / ' + total + '</span><strong>' + message + '</strong><span>bonnes réponses</span></div>' +
-      '<button type="button" class="quiz-primary" onclick="ouvrirQuiz(' + quizSession.choixLecon + ')">Recommencer <span aria-hidden="true">↻</span></button>' +
+      '<button type="button" class="quiz-primary" onclick="demarrerQuiz(' + quizSession.choixLecon + ')">Recommencer <span aria-hidden="true">↻</span></button>' +
       '<button type="button" class="resource-back quiz-back" onclick="openMenu()">Retour au menu</button>');
     return;
   }
@@ -310,6 +323,18 @@ function openMenu() {
 function basculerLectureAutomatique() {
   closeMenu();
   toggleAuto();
+}
+function retourEcranPrecedent() {
+  const titre = document.getElementById("menu-titre").textContent;
+  if (quizSession && (titre === "Quiz Guidar" || titre === "Quiz terminé")) {
+    ouvrirQuiz();
+    return;
+  }
+  if (titre === "Menu d’apprentissage") {
+    closeMenu();
+    return;
+  }
+  openMenu();
 }
 function closeMenu() {
   const menu = document.getElementById("menu");

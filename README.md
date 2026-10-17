@@ -6,9 +6,9 @@ Ouvre `guidar-final.html` dans un navigateur. L’application fonctionne hors li
 
 **Garde ensemble** `guidar-final.html`, le dossier `css` et le dossier `js` : la page charge ces fichiers par des chemins relatifs.
 
-L’écran d’accueil GuidarApp propose une recherche en Guidar ou en français, un accès direct à la leçon, l’écoute du mot et une navigation par glissement horizontal. La barre du bas donne accès à l’accueil, aux leçons, à l’écoute, aux ressources, aux quiz et à l’espace compte (encore indisponible). Le menu à trois points rassemble aussi le clavier spécial, l’alphabet, la lecture automatique et les paramètres.
+L’écran d’accueil GuidarApp souhaite la bienvenue et présente l’application : découvrir le Guidar à son rythme avec des leçons, l’écoute, les traductions et les quiz. Il propose aussi une recherche en Guidar ou en français et une navigation par glissement horizontal. La barre du bas donne accès à l’accueil, aux leçons, à l’écoute, aux ressources, aux quiz et à l’espace compte (encore indisponible). Le menu à trois points rassemble aussi le clavier spécial, l’alphabet, la lecture automatique et les paramètres.
 
-L’espace **Quiz**, accessible depuis la barre du bas ou le menu, propose jusqu’à dix questions à choix multiples tirées des mots et traductions présents dans les leçons. Le score est calculé à la fin de la partie. Comme le lexique attend une validation spécialisée, un rappel est affiché dans le quiz ; ses choix ne remplacent pas une validation linguistique.
+L’espace **Quiz**, accessible depuis la barre du bas ou le menu, classe les parcours par leçon et propose aussi une catégorie couvrant toutes les leçons. Chaque partie propose jusqu’à dix questions à choix multiples tirées des mots et traductions présents dans la catégorie. Le score est calculé à la fin de la partie. Comme le lexique attend une validation spécialisée, un rappel est affiché dans le quiz ; ses choix ne remplacent pas une validation linguistique.
 
 Dans **Paramètres et accessibilité**, le thème clair ou sombre, la taille du texte, le contraste, l’affichage des aides provisoires et la vitesse de lecture sont mémorisés sur l’appareil.
 

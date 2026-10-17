@@ -586,7 +586,7 @@ body.contraste-renforce{--app-bg:#000;--surface:#000;--surface-muted:#101010;--t
 body.contraste-renforce .start-button,body.contraste-renforce .listen-button{color:#000;}
 @media(max-width:560px){
   .hdr{min-height:58px;padding:8px 13px;}
-  .search-area,.start-strip,.main{width:calc(100% - 24px);}
+  .search-area,.welcome-card,.main{width:calc(100% - 24px);}
   .search-area{margin-top:10px;}
   .welcome-card{width:calc(100% - 24px);display:block;margin-top:10px;padding:16px;border-radius:16px;}
   .welcome-copy h1{font-size:21px;}
