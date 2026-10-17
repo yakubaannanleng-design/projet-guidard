@@ -196,10 +196,10 @@ function closeMenu() {
   const menu = document.getElementById("menu");
   const cibleFocus = focusAvantMenu && !menu.contains(focusAvantMenu)
     ? focusAvantMenu
-    : document.querySelector(".bbar button[aria-label=\"Choisir une leçon\"]");
-  if (cibleFocus && cibleFocus.focus) cibleFocus.focus();
+    : document.querySelector(".nav-item");
   menu.style.display = "none";
   menu.setAttribute("aria-hidden", "true");
+  if (cibleFocus && cibleFocus.focus) cibleFocus.focus();
 }
 
 function chooseLecon(i) {
