@@ -116,10 +116,12 @@ function go(dir) {
   const mots = LECONS[curL].mots;
   curM = ((curM + dir) % mots.length + mots.length) % mots.length;
   show(curM);
-  lectureDifferee = setTimeout(() => {
-    lectureDifferee = null;
-    speak(() => { if (autoPlay) sched(); });
-  }, 350);
+  if (autoPlay) {
+    lectureDifferee = setTimeout(() => {
+      lectureDifferee = null;
+      speak(() => { if (autoPlay) sched(); });
+    }, 350);
+  }
 }
 
 function sched() {

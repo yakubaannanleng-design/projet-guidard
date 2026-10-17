@@ -169,6 +169,7 @@ function ouvrirParametres() {
 function ouvrirClavierDepuisMenu() { closeMenu(); if (!kbOn) toggleKb(); }
 function openMenu() {
   if (document.getElementById("menu").style.display !== "flex") focusAvantMenu = document.activeElement;
+  masquerResultatsRecherche();
   clearTimeout(tmr); clearTimeout(lectureDifferee); lectureDifferee = null;
   if (autoPlay) toggleAuto();
   speechRun++; stopAudio(); if (VOIX_OK) window.speechSynthesis.cancel();
