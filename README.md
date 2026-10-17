@@ -39,6 +39,22 @@ Les entrées des leçons se trouvent dans `js/data.js`. Une entrée comporte gé
 
 Pour éviter de désynchroniser les enregistrements existants, ne réordonne pas les entrées des leçons 1 à 7 sans vérifier aussi les fichiers audio correspondants. Après une modification, ouvre la page dans le navigateur et vérifie le menu, la recherche et la leçon concernée.
 
+## Préparer la validation par un spécialiste du Guidar
+
+Le projet contient des transcriptions et des aides de prononciation de statuts différents. Ne considère pas une approximation comme une prononciation confirmée. Pour préparer une relecture, ouvre PowerShell à la racine du projet et lance :
+
+```powershell
+node .\scripts\Export-LinguisticReview.cjs
+```
+
+Le script crée ou actualise trois fichiers CSV dans `docs` :
+
+- `validation-lexique.csv` reprend les entrées Guidar et leurs traductions actuellement intégrées, avec des colonnes pour noter les corrections et validations.
+- `validation-alphabet.csv` recense les caractères spéciaux déjà rencontrés dans l’application. Cette liste n’est pas présentée comme un alphabet complet.
+- `validation-syllabes.csv` est une grille vierge à remplir avec le spécialiste ; aucune syllabe n’est inventée par le programme.
+
+Les fichiers CSV s’ouvrent dans Excel ou LibreOffice. Après une correction validée, reporte-la dans `js/data.js`, puis relance l’export pour préparer la relecture suivante.
+
 ## Fonctionnement hors ligne
 
 Les scripts sont chargés dans un ordre explicite par `guidar-final.html`. Ils utilisent des balises `<script>` classiques afin de rester compatibles avec l’ouverture directe d’un fichier local. Ne les remplace pas par des modules JavaScript `type="module"` sans mettre également en place un serveur local.
