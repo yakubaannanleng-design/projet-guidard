@@ -149,13 +149,15 @@ function demarrerQuiz() {
   const source = choixLecon === -1
     ? LECONS.flatMap((lecon, leconIndex) => lecon.mots.map(mot => ({ mot, leconIndex })))
     : LECONS[choixLecon].mots.map(mot => ({ mot, leconIndex: choixLecon }));
-  const vus = new Set();
+  const vusGuidar = new Set();
+  const vuesTraductions = new Set();
   const entrees = source.filter(({ mot }) => {
     if (!mot.g || !mot.f) return false;
     const guidar = mot.g.trim().toLocaleLowerCase("fr");
     const francais = mot.f.trim().toLocaleLowerCase("fr");
-    if (vus.has(guidar) || !francais) return false;
-    vus.add(guidar);
+    if (vusGuidar.has(guidar) || vuesTraductions.has(francais) || !francais) return false;
+    vusGuidar.add(guidar);
+    vuesTraductions.add(francais);
     return true;
   });
   if (entrees.length < 4) {
