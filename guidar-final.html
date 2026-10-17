@@ -40,13 +40,15 @@
     <div class="search-results" id="search-results" role="listbox" aria-label="Résultats de recherche" hidden></div>
   </section>
 
-  <div class="start-strip">
-    <div class="start-copy">
-      <strong>Prêt à apprendre ?</strong>
-      <span id="ctr">— / —</span>
+  <section class="welcome-card" aria-labelledby="welcome-title">
+    <div class="welcome-copy">
+      <span class="welcome-eyebrow">LANGUE · CULTURE · PARTAGE</span>
+      <h1 id="welcome-title">Bienvenue dans GuidarApp</h1>
+      <p>Découvre le Guidar à ton rythme : explore les leçons, écoute les mots, lis leur traduction et entraîne-toi avec les quiz.</p>
+      <span class="welcome-progress" id="ctr">— / —</span>
     </div>
-    <button class="start-button" type="button" onclick="commencerApprentissage()">Commencer <span aria-hidden="true">→</span></button>
-  </div>
+    <button class="start-button" type="button" onclick="commencerApprentissage()">Commencer à apprendre <span aria-hidden="true">→</span></button>
+  </section>
 
   <!-- CONTENU PRINCIPAL -->
   <div class="main" id="main" tabindex="-1" role="region" aria-label="Mot et traduction" aria-live="polite" aria-atomic="true">
@@ -82,7 +84,10 @@
 <div id="menu" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="menu-titre">
   <div class="menu-hdr">
     <span class="menu-titre" id="menu-titre">Choisir une leçon</span>
-    <button class="menu-close" onclick="closeMenu()" aria-label="Fermer le menu">×</button>
+    <button class="menu-close" onclick="retourEcranPrecedent()" aria-label="Retour">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h11"/></svg>
+      <span>Retour</span>
+    </button>
   </div>
   <div id="menu-liste"></div>
 </div>
