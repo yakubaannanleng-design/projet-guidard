@@ -27,21 +27,7 @@
         "panel": "dedicated",
         "clear": false
       },
-      "problemMatcher": [
-        {
-          "pattern": [
-            {
-              "regexp": "^(?:\\[Guidar sync\\]) (?:ERREUR) (.*)$",
-              "message": 1
-            }
-          ],
-          "background": {
-            "activeOnStart": true,
-            "beginsPattern": "^\\[Guidar sync\\] AUTOMATIQUE actif.*$",
-            "endsPattern": "^\\[Guidar sync\\] ARRÊT$"
-          }
-        }
-      ]
+      "problemMatcher": []
     }
   ]
 }
