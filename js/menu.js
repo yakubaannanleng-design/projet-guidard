@@ -31,6 +31,7 @@ const CATEGORIES_NUMERIQUES = [
   { titre: "Vocabulaire et culture", icone: "🌱", lecons: [9] },
   { titre: "Dialogue", icone: "💬", lecons: [10] }
 ];
+let quizSession = null;
 function echapperHtml(texte) {
   const remplacements = { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" };
   return String(texte).replace(/[&<>"']/g, caractere => remplacements[caractere]);
@@ -116,6 +117,120 @@ function retourAccueil() {
 function afficherCompte() {
   toast("L’espace compte sera disponible dans une prochaine version.");
 }
+function melangerTableau(elements) {
+  const resultat = elements.slice();
+  for (let index = resultat.length - 1; index > 0; index--) {
+    const autreIndex = Math.floor(Math.random() * (index + 1));
+    [resultat[index], resultat[autreIndex]] = [resultat[autreIndex], resultat[index]];
+  }
+  return resultat;
+}
+function ouvrirQuiz(leconIndex = -1) {
+  if (document.getElementById("menu").style.display !== "flex") openMenu();
+  quizSession = null;
+  const optionsLecons = LECONS.map((lecon, index) =>
+    '<option value="' + index + '" ' + (leconIndex === index ? "selected" : "") + '>' +
+    echapperHtml(lecon.titre) + '</option>'
+  ).join("");
+  afficherMenu("Quiz Guidar", '<div class="module-note"><strong>À toi de jouer !</strong><br>Lis la traduction française et choisis le mot Guidar correspondant. Les réponses proviennent des leçons actuellement intégrées.</div>' +
+    '<label class="menu-section-title" for="quiz-lesson">Choisir un parcours</label>' +
+    '<select id="quiz-lesson" class="resource-search"><option value="-1" ' + (leconIndex === -1 ? "selected" : "") + '>Toutes les leçons</option>' + optionsLecons + '</select>' +
+    '<div class="quiz-notice">Certaines graphies et traductions attendent encore la validation d’un spécialiste.</div>' +
+    '<button type="button" class="quiz-primary" onclick="demarrerQuiz()">Commencer le quiz <span aria-hidden="true">→</span></button>');
+}
+function demarrerQuiz() {
+  const selecteur = document.getElementById("quiz-lesson");
+  const choixLecon = selecteur ? Number(selecteur.value) : -1;
+  if (!Number.isInteger(choixLecon) || choixLecon < -1 || choixLecon >= LECONS.length) {
+    console.error("Parcours de quiz invalide.", choixLecon);
+    toast("Impossible de démarrer ce quiz. Choisis un parcours valide.");
+    return;
+  }
+  const source = choixLecon === -1
+    ? LECONS.flatMap((lecon, leconIndex) => lecon.mots.map(mot => ({ mot, leconIndex })))
+    : LECONS[choixLecon].mots.map(mot => ({ mot, leconIndex: choixLecon }));
+  const vus = new Set();
+  const entrees = source.filter(({ mot }) => {
+    if (!mot.g || !mot.f) return false;
+    const guidar = mot.g.trim().toLocaleLowerCase("fr");
+    const francais = mot.f.trim().toLocaleLowerCase("fr");
+    if (vus.has(guidar) || !francais) return false;
+    vus.add(guidar);
+    return true;
+  });
+  if (entrees.length < 4) {
+    afficherMenu("Quiz indisponible", '<div class="module-note">Ce parcours ne contient pas encore assez de réponses distinctes pour proposer un quiz fiable. Essaie toutes les leçons ou choisis un autre parcours.</div><button type="button" class="resource-back" onclick="ouvrirQuiz(' + choixLecon + ')">Choisir un autre parcours</button>');
+    return;
+  }
+  const questions = melangerTableau(entrees).map(({ mot, leconIndex }) => {
+    const traduction = mot.f.trim().toLocaleLowerCase("fr");
+    const distracteurs = melangerTableau(entrees.filter(entree =>
+      entree.mot.g.trim().toLocaleLowerCase("fr") !== mot.g.trim().toLocaleLowerCase("fr") &&
+      entree.mot.f.trim().toLocaleLowerCase("fr") !== traduction
+    )).slice(0, 3);
+    return distracteurs.length === 3 ? {
+      question: mot,
+      leconIndex,
+      choix: melangerTableau([mot, ...distracteurs.map(entree => entree.mot)]),
+      repondu: false,
+      correct: false
+    } : null;
+  }).filter(Boolean).slice(0, 10);
+  if (questions.length === 0) {
+    toast("Ce parcours n’a pas assez de traductions distinctes pour créer des questions.");
+    return;
+  }
+  quizSession = { questions, index: 0, score: 0, choixLecon };
+  afficherQuestionQuiz();
+}
+function afficherQuestionQuiz() {
+  if (!quizSession) return;
+  if (quizSession.index >= quizSession.questions.length) {
+    const total = quizSession.questions.length;
+    const score = quizSession.score;
+    const message = score === total ? "Excellent, sans faute !" : score >= Math.ceil(total * 0.7) ? "Bravo, tu progresses bien !" : "Continue à t’entraîner, tu vas y arriver !";
+    afficherMenu("Quiz terminé", '<div class="quiz-score"><span class="quiz-score-value">' + score + ' / ' + total + '</span><strong>' + message + '</strong><span>bonnes réponses</span></div>' +
+      '<button type="button" class="quiz-primary" onclick="ouvrirQuiz(' + quizSession.choixLecon + ')">Recommencer <span aria-hidden="true">↻</span></button>' +
+      '<button type="button" class="resource-back quiz-back" onclick="openMenu()">Retour au menu</button>');
+    return;
+  }
+  const question = quizSession.questions[quizSession.index];
+  const boutons = question.choix.map((choix, index) => {
+    let classe = "quiz-answer";
+    if (question.repondu && choix.g === question.question.g) classe += " quiz-correct";
+    else if (question.repondu && question.choix[index].g === question.choix[question.selection]?.g) classe += " quiz-wrong";
+    return '<button type="button" class="' + classe + '" ' + (question.repondu ? "disabled" : "") +
+      ' onclick="repondreQuiz(' + index + ')"><span class="quiz-answer-index">' + String.fromCharCode(65 + index) +
+      '</span><span>' + echapperHtml(choix.g) + '</span></button>';
+  }).join("");
+  const retour = question.repondu
+    ? '<div class="quiz-feedback ' + (question.correct ? "is-correct" : "is-wrong") + '" role="status">' +
+      (question.correct ? "Bonne réponse !" : "La bonne réponse est : " + echapperHtml(question.question.g)) +
+      '</div><button type="button" class="quiz-primary" onclick="questionQuizSuivante()">' +
+      (quizSession.index + 1 === quizSession.questions.length ? "Voir mon résultat" : "Question suivante") + ' <span aria-hidden="true">→</span></button>'
+    : "";
+  afficherMenu("Quiz Guidar", '<div class="quiz-progress"><span>Question ' + (quizSession.index + 1) + ' sur ' + quizSession.questions.length +
+    '</span><span>Score : ' + quizSession.score + '</span></div><div class="quiz-progress-track"><span style="width:' +
+    Math.round(quizSession.index / quizSession.questions.length * 100) + '%"></span></div>' +
+    '<div class="quiz-question-label">Comment dit-on en Guidar ?</div><div class="quiz-question">' +
+    echapperHtml(question.question.f) + '</div><div class="quiz-answers">' + boutons + '</div>' + retour +
+    '<div class="quiz-notice">Les réponses utilisent le contenu existant, qui reste à valider par un spécialiste.</div>');
+}
+function repondreQuiz(index) {
+  if (!quizSession || !Number.isInteger(index)) return;
+  const question = quizSession.questions[quizSession.index];
+  if (!question || question.repondu || index < 0 || index >= question.choix.length) return;
+  question.selection = index;
+  question.repondu = true;
+  question.correct = question.choix[index].g === question.question.g;
+  if (question.correct) quizSession.score++;
+  afficherQuestionQuiz();
+}
+function questionQuizSuivante() {
+  if (!quizSession || !quizSession.questions[quizSession.index]?.repondu) return;
+  quizSession.index++;
+  afficherQuestionQuiz();
+}
 function ouvrirAide() {
   openMenu();
   afficherMenu("Guide de navigation",
@@ -178,6 +293,7 @@ function openMenu() {
   const cartes = '<div class="module-note">Sans compte ni connexion : ta progression et tes réglages restent sur cet appareil.</div><h2 class="menu-section-title">Apprendre et consulter</h2>' +
     '<button type="button" class="menu-card" onclick="ouvrirAlphabet()"><span class="menu-card-icon" aria-hidden="true">🔠</span><span><span class="menu-card-title">Alphabet et syllabes</span><span class="menu-card-description">Première étape pour débutants, enfants et adultes · contenu à valider.</span></span></button>' +
     '<button type="button" class="menu-card" onclick="afficherBibliotheque()"><span class="menu-card-icon" aria-hidden="true">📚</span><span><span class="menu-card-title">Bibliothèque numérique</span><span class="menu-card-description">Rechercher parmi les mots et traductions déjà intégrés.</span></span></button>' +
+    '<button type="button" class="menu-card" onclick="ouvrirQuiz()"><span class="menu-card-icon" aria-hidden="true">✓</span><span><span class="menu-card-title">Quiz</span><span class="menu-card-description">Vérifier tes connaissances avec les mots des leçons.</span></span></button>' +
     '<button type="button" class="menu-card" onclick="basculerLectureAutomatique()"><span class="menu-card-icon" aria-hidden="true">▶</span><span><span class="menu-card-title">Lecture automatique</span><span class="menu-card-description">Faire défiler et écouter les entrées automatiquement.</span></span></button>' +
     '<button type="button" class="menu-card" onclick="ouvrirClavierDepuisMenu()"><span class="menu-card-icon" aria-hidden="true">⌨️</span><span><span class="menu-card-title">Clavier Guidar</span><span class="menu-card-description">Afficher les lettres spéciales et les copier.</span></span></button>' +
     '<button type="button" class="menu-card" onclick="ouvrirParametres()"><span class="menu-card-icon" aria-hidden="true">⚙️</span><span><span class="menu-card-title">Paramètres et accessibilité</span><span class="menu-card-description">Taille du texte, contraste, aides phonétiques et vitesse de lecture.</span></span></button>' +
