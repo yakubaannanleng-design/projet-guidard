@@ -57,14 +57,16 @@ function show(idx) {
         ${phonetique ? `<div class="prononciation${phonetique.provisoire ? " prononciation-provisoire" : ""}" aria-label="${phonetique.provisoire ? "Aide de prononciation approximative, à valider" : "Aide de prononciation"}">${phonetique.texte}</div>` : ""}
         <div class="sep"></div>
         <div class="wf">${m.f}</div>
+        <div class="entry-hint">Glisse horizontalement pour découvrir le mot suivant</div>
         ${noteValidation}
-        <div class="audio-validation" role="group" aria-label="Validation de la correspondance audio">
+        <div class="audio-validation"><details>
+          <summary>Vérifier l’enregistrement</summary>
           <div class="audio-validation-label">Après écoute, indique si l’enregistrement correspond à cette entrée.</div>
           <button type="button" data-validation="conforme" onclick="marquerValidationAudio('conforme')"
             class="${audioConforme ? "on" : ""}" aria-pressed="${audioConforme}">✓ Correspond</button>
           <button type="button" data-validation="corriger" onclick="marquerValidationAudio('corriger')"
             class="${audioACorriger ? "on" : ""}" aria-pressed="${audioACorriger}">⚠ À corriger</button>
-        </div>
+        </details></div>
       `;
     }
     // Fade in
@@ -129,7 +131,7 @@ function sched() {
 function toggleAuto() {
   autoPlay = !autoPlay;
   const b = document.getElementById("b-auto");
-  if (autoPlay) {
+  if (b && autoPlay) {
     b.textContent = "⏸ Pause";
     b.classList.add("on");
     b.setAttribute("aria-pressed", "true");
@@ -143,10 +145,28 @@ function toggleAuto() {
       lectureDifferee = null;
       speak(() => { if (autoPlay) sched(); });
     }, 350);
-  } else {
+  } else if (b) {
     b.textContent = "▶ Auto";
     b.classList.remove("on");
     b.setAttribute("aria-pressed", "false");
+    clearTimeout(tmr);
+    clearTimeout(lectureDifferee);
+    lectureDifferee = null;
+    stopBar();
+    speechRun++;
+    stopAudio();
+    if (VOIX_OK) window.speechSynthesis.cancel();
+  } else if (autoPlay) {
+    clearTimeout(tmr);
+    stopBar();
+    speechRun++;
+    stopAudio();
+    if (VOIX_OK) window.speechSynthesis.cancel();
+    lectureDifferee = setTimeout(() => {
+      lectureDifferee = null;
+      speak(() => { if (autoPlay) sched(); });
+    }, 350);
+  } else {
     clearTimeout(tmr);
     clearTimeout(lectureDifferee);
     lectureDifferee = null;

@@ -3,8 +3,11 @@
 function toggleKb() {
   kbOn = !kbOn;
   document.getElementById("keyboard").classList.toggle("on", kbOn);
-  document.getElementById("b-kb").classList.toggle("on", kbOn);
-  document.getElementById("b-kb").setAttribute("aria-expanded", String(kbOn));
+  const bouton = document.getElementById("b-kb");
+  if (bouton) {
+    bouton.classList.toggle("on", kbOn);
+    bouton.setAttribute("aria-expanded", String(kbOn));
+  }
 }
 async function kopy(c) {
   let erreurPressePapiers = null;

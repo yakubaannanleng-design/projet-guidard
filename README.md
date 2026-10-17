@@ -6,6 +6,10 @@ Ouvre `guidar-final.html` dans un navigateur. L’application fonctionne hors li
 
 **Garde ensemble** `guidar-final.html`, le dossier `css` et le dossier `js` : la page charge ces fichiers par des chemins relatifs.
 
+L’écran d’accueil GuidarApp propose une recherche en Guidar ou en français, un accès direct à la leçon, l’écoute du mot et une navigation par glissement horizontal. La barre du bas donne accès à l’accueil, aux leçons, à l’écoute, aux ressources et à l’espace compte (encore indisponible). Le menu à trois points rassemble le clavier spécial, l’alphabet, la lecture automatique et les paramètres.
+
+Dans **Paramètres et accessibilité**, le thème clair ou sombre, la taille du texte, le contraste, l’affichage des aides provisoires et la vitesse de lecture sont mémorisés sur l’appareil.
+
 ## Où modifier le programme
 
 - `guidar-final.html` : structure de la page et ordre de chargement des fichiers.
