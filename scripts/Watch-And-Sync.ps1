@@ -37,11 +37,11 @@ function Invoke-Git {
   }
 }
 
-$rootResult = Invoke-Git -Arguments @("rev-parse", "--show-toplevel")
+$rootResult = Invoke-Git -Arguments @("rev-parse", "--show-prefix")
 if ($rootResult.ExitCode -ne 0) {
   throw "Aucun dépôt Git initialisé. Lance scripts\Initialize-GitHub.ps1 une seule fois."
 }
-if ([IO.Path]::GetFullPath($rootResult.Output) -ne [IO.Path]::GetFullPath($projectRoot)) {
+if ($rootResult.Output) {
   throw "Le dépôt Git détecté n’est pas la racine de Projet Guidard."
 }
 
