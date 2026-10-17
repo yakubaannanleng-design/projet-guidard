@@ -51,6 +51,13 @@ if ($remoteResult.ExitCode -ne 0 -or $remoteResult.Output -notmatch "^https://gi
 }
 
 Write-Output "[Guidar sync] AUTOMATIQUE actif — sauvegarde après $DebounceSeconds secondes sans modification."
+$initialStatus = Invoke-Git -Arguments @("status", "--porcelain", "--untracked-files=all")
+if ($initialStatus.ExitCode -ne 0) {
+  throw "Impossible de lire l’état initial du dépôt Git : $($initialStatus.Output)"
+}
+if (-not $initialStatus.Output) {
+  Write-Output "[Guidar sync] Aucun changement en attente ; la surveillance est prête."
+}
 $lastStatus = $null
 $lastChangeAt = $null
 $pendingPush = $false
@@ -59,7 +66,7 @@ $nextPushAt = Get-Date
 while ($true) {
   $statusResult = Invoke-Git -Arguments @("status", "--porcelain", "--untracked-files=all")
   if ($statusResult.ExitCode -ne 0) {
-    Write-Output "[Guidar sync] ERREUR Lecture de l etat Git impossible : $($statusResult.Output)"
+    Write-Output "[Guidar sync] ERREUR scripts/Watch-And-Sync.ps1: Lecture de l’état Git impossible : $($statusResult.Output)"
     Start-Sleep -Seconds $PollIntervalSeconds
     continue
   }
@@ -79,7 +86,7 @@ while ($true) {
   if ($status -and $lastChangeAt -and ($now - $lastChangeAt).TotalSeconds -ge $DebounceSeconds) {
     $stage = Invoke-Git -Arguments @("add", "--all")
     if ($stage.ExitCode -ne 0) {
-      Write-Output "[Guidar sync] ERREUR Ajout des fichiers impossible : $($stage.Output)"
+      Write-Output "[Guidar sync] ERREUR scripts/Watch-And-Sync.ps1: Ajout des fichiers impossible : $($stage.Output)"
       $lastChangeAt = $now
     } else {
       $staged = Invoke-Git -Arguments @("diff", "--cached", "--quiet")
@@ -96,11 +103,11 @@ while ($true) {
           $pendingPush = $true
           $nextPushAt = $now
         } else {
-          Write-Output "[Guidar sync] ERREUR Creation de la version impossible : $($commit.Output)"
+          Write-Output "[Guidar sync] ERREUR scripts/Watch-And-Sync.ps1: Création de la version impossible : $($commit.Output)"
           $lastChangeAt = $now
         }
       } elseif ($staged.ExitCode -gt 1) {
-        Write-Output "[Guidar sync] ERREUR Verification des fichiers prepares impossible : $($staged.Output)"
+        Write-Output "[Guidar sync] ERREUR scripts/Watch-And-Sync.ps1: Vérification des fichiers préparés impossible : $($staged.Output)"
         $lastChangeAt = $now
       } else {
         $lastChangeAt = $null
@@ -120,7 +127,7 @@ while ($true) {
       Write-Output "[Guidar sync] Synchronisation GitHub terminée."
       $pendingPush = $false
     } else {
-      Write-Output "[Guidar sync] ERREUR Envoi GitHub impossible ; nouvelle tentative dans 60 secondes : $($push.Output)"
+      Write-Output "[Guidar sync] ERREUR scripts/Watch-And-Sync.ps1: Envoi GitHub impossible ; nouvelle tentative dans 60 secondes : $($push.Output)"
       $nextPushAt = $now.AddSeconds(60)
     }
   }

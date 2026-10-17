@@ -21,13 +21,26 @@
         "instanceLimit": 1
       },
       "presentation": {
-        "echo": false,
-        "reveal": "silent",
+        "echo": true,
+        "reveal": "always",
         "focus": false,
         "panel": "dedicated",
         "clear": false
       },
-      "problemMatcher": []
+      "problemMatcher": {
+        "owner": "guidard-sync",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^\\[Guidar sync\\] ERREUR (scripts/Watch-And-Sync\\.ps1): (.*)$",
+          "file": 1,
+          "message": 2
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^\\[Guidar sync\\] AUTOMATIQUE actif.*$",
+          "endsPattern": "^\\[Guidar sync\\] ARRÊT$"
+        }
+      }
     }
   ]
 }

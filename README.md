@@ -71,6 +71,6 @@ Le dépôt distant est privé : seuls les comptes autorisés peuvent consulter s
    ```
 
 3. Rouvre le dossier du projet dans VS Code et accepte le lancement de la tâche automatique si VS Code le demande.
-4. Quand des fichiers sont modifiés et enregistrés, le surveillant crée une version puis l’envoie au dépôt après 60 secondes sans changement. Le transfert des dossiers audio et images peut nécessiter davantage de temps selon la connexion.
+4. Le terminal « Guidard : synchronisation automatique » s’affiche et indique « AUTOMATIQUE actif », puis confirme si aucun changement n’est en attente. Quand des fichiers sont modifiés et enregistrés, le surveillant crée une version puis l’envoie au dépôt après 60 secondes sans changement. Le transfert des dossiers audio et images peut nécessiter davantage de temps selon la connexion.
 
-La tâche n’efface ni ne télécharge automatiquement les changements distants. Une erreur Git ou réseau est affichée dans son terminal ; les envois échoués sont retentés. Ne modifie pas la version GitHub depuis une autre machine avant d’avoir synchronisé cette copie locale. Ne ferme pas VS Code avant que le message de synchronisation terminée apparaisse.
+Une erreur Git ou réseau est affichée dans son terminal et dans le panneau Problèmes ; les envois échoués sont retentés. La tâche n’efface ni ne télécharge automatiquement les changements distants. Ne modifie pas la version GitHub depuis une autre machine avant d’avoir synchronisé cette copie locale. Ne ferme pas VS Code avant que le message de synchronisation terminée apparaisse.
