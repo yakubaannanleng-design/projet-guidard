@@ -477,7 +477,7 @@ body.theme-dark{
 .prononciation{color:var(--text-muted);font-size:clamp(13px,3.4vw,18px);letter-spacing:.2px;}
 .prononciation-provisoire::after{color:var(--text-muted);}
 .sep{width:42px;height:3px;border-radius:4px;background:var(--line);}
-.wf{max-width:100%;color:var(--text);font-size:clamp(18px,4.7vw,30px);font-weight:500;}
+.wf{max-width:100%;color:var(--text);font-size:clamp(21px,5.2vw,34px);font-weight:500;}
 .note-card{border-color:var(--line);background:var(--surface-muted);color:var(--text-muted);}
 .entry-hint{color:var(--text-muted);font-size:11px;text-align:center;}
 .entry-validation{color:var(--text-muted);}

@@ -62,7 +62,6 @@ function show(idx) {
         ${phonetique ? `<div class="prononciation${phonetique.provisoire ? " prononciation-provisoire" : ""}" aria-label="${phonetique.provisoire ? "Aide de prononciation approximative, à valider" : "Aide de prononciation"}">${phonetique.texte}</div>` : ""}
         <div class="sep"></div>
         <div class="wf">${m.f}</div>
-        <div class="entry-hint">Balaye ou utilise les boutons pour parcourir la leçon</div>
         ${navigationMots}
         ${noteValidation}
         <div class="audio-validation"><details>
