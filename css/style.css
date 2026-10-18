@@ -680,3 +680,19 @@ body.contraste-renforce .start-button,body.contraste-renforce .listen-button{col
   .welcome-card .start-button{min-height:36px;}
   .main{padding-top:30px;padding-bottom:18px;}
 }
+body .wg{font-size:clamp(calc(28px * var(--taille-texte)),calc(6vw * var(--taille-texte)),calc(46px * var(--taille-texte)));}
+body.texte-agrandi .wg{font-size:clamp(calc(40px * var(--taille-texte)),calc(10vw * var(--taille-texte)),calc(74px * var(--taille-texte)));}
+body .wf{font-size:clamp(calc(21px * var(--taille-texte)),calc(5.2vw * var(--taille-texte)),calc(34px * var(--taille-texte)));}
+body.texte-agrandi .wf{font-size:clamp(calc(21px * var(--taille-texte)),calc(5.5vw * var(--taille-texte)),calc(38px * var(--taille-texte)));}
+body .prononciation{font-size:clamp(calc(13px * var(--taille-texte)),calc(3.4vw * var(--taille-texte)),calc(18px * var(--taille-texte)));}
+body .hdr-tag{font-size:calc(18px * var(--taille-texte));}
+body .hdr-lecon,.nav-item span,.welcome-progress,.quiz-category-meta,.resource-meta,.entry-hint{font-size:calc(11px * var(--taille-texte));}
+body .welcome-copy h1{font-size:clamp(calc(20px * var(--taille-texte)),calc(4vw * var(--taille-texte)),calc(27px * var(--taille-texte)));}
+body .welcome-quote{font-size:clamp(calc(15px * var(--taille-texte)),calc(2.5vw * var(--taille-texte)),calc(19px * var(--taille-texte)));}
+body .welcome-description,.search-result span,.search-empty{font-size:calc(12px * var(--taille-texte));}
+body .welcome-eyebrow,.resource-back,.section-toolbar strong{font-size:calc(10px * var(--taille-texte));}
+body .start-button,.search-box input,.word-navigation button,.resource-translation{font-size:calc(14px * var(--taille-texte));}
+body .menu-titre,.resource-guidar{font-size:calc(17px * var(--taille-texte));}
+body .menu-section-title,.setting-row{font-size:calc(12px * var(--taille-texte));}
+body .menu-card-title,.quiz-category-title{font-size:calc(13px * var(--taille-texte));}
+body .menu-card-description,.module-note,.resource-search,.entry-validation{font-size:calc(11px * var(--taille-texte));}
