@@ -551,18 +551,18 @@ body.theme-dark{
   background:var(--surface-muted);color:var(--text);font:inherit;cursor:pointer;
 }
 .theme-choice button[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-strong);font-weight:700;}
- .section-toolbar{
+.section-toolbar{
   width:min(100% - 32px,760px);min-height:54px;display:flex;align-items:center;
   gap:10px;margin:10px auto 0;color:var(--text);
 }
 .section-toolbar[hidden]{display:none;}
 .section-toolbar strong{flex:1;font-size:15px;}
-.section-home-button,.section-action-button{
+.section-action-button{
   min-height:40px;padding:0 12px;border:1px solid var(--line);border-radius:11px;
   background:var(--surface);color:var(--text);font:inherit;font-size:12px;font-weight:650;cursor:pointer;
 }
 .section-action-button{background:var(--accent);border-color:var(--accent);color:#fff;}
-body[data-section-window] .bbar{display:none;}
+body[data-section-window] #menu{bottom:calc(70px + env(safe-area-inset-bottom));}
 body[data-section-window] .section-toolbar{display:flex;}
 body[data-section-window="accueil"] .section-toolbar{display:none;}
 body[data-section-window="accueil"] .main,
