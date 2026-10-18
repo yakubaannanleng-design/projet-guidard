@@ -33,6 +33,11 @@ function show(idx) {
   const mots = LECONS[leconIndex].mots;
   const m    = mots[idx];
   const main = document.getElementById("main");
+  const navigationMots = `
+    <div class="word-navigation" aria-label="Navigation entre les mots de la leçon">
+      <button type="button" onclick="go(-1)" aria-label="Mot précédent">← Précédent</button>
+      <button type="button" onclick="go(1)" aria-label="Mot suivant">Suivant →</button>
+    </div>`;
   vus[leconIndex] = Math.max(vus[leconIndex] || 0, idx + 1);
   sauvegarderProgression();
 
@@ -43,7 +48,7 @@ function show(idx) {
     if (curL !== leconIndex || curM !== idx) return;
     if (!m.g) {
       // Mot note/titre — pas de texte Guidar
-      main.innerHTML = `<div class="note-card">${m.f}</div>`;
+      main.innerHTML = `<div class="note-card">${m.f}</div>${navigationMots}`;
     } else {
       const cleAudio = cleValidationAudio(leconIndex, idx);
       const audioConforme = validationsAudio[cleAudio] === "conforme";
@@ -57,7 +62,8 @@ function show(idx) {
         ${phonetique ? `<div class="prononciation${phonetique.provisoire ? " prononciation-provisoire" : ""}" aria-label="${phonetique.provisoire ? "Aide de prononciation approximative, à valider" : "Aide de prononciation"}">${phonetique.texte}</div>` : ""}
         <div class="sep"></div>
         <div class="wf">${m.f}</div>
-        <div class="entry-hint">Glisse horizontalement pour découvrir le mot suivant</div>
+        <div class="entry-hint">Balaye ou utilise les boutons pour parcourir la leçon</div>
+        ${navigationMots}
         ${noteValidation}
         <div class="audio-validation"><details>
           <summary>Vérifier l’enregistrement</summary>

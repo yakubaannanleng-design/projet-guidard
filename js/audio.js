@@ -65,6 +65,10 @@ function pistesAudio(leconIndex, motIndex) {
 }
 
 function speak(onComplete) {
+  lireEntree(curL, curM, onComplete);
+}
+
+function lireEntree(leconIndex, motIndex, onComplete) {
   clearTimeout(lectureDifferee);
   lectureDifferee = null;
   const run = ++speechRun;
@@ -75,7 +79,8 @@ function speak(onComplete) {
     stopBar();
   }
 
-  const m = LECONS[curL].mots[curM];
+  const lecon = LECONS[leconIndex];
+  const m = lecon && lecon.mots[motIndex];
   if (!m) {
     if (onComplete) onComplete();
     return;
@@ -103,7 +108,7 @@ function speak(onComplete) {
   // Délai obligatoire après cancel() sur Android Chrome
   setTimeout(() => {
     if (run !== speechRun) return;
-    const sources = pistesAudio(curL, curM);
+    const sources = pistesAudio(leconIndex, motIndex);
     if (sources.length === 0) {
       lireTraduction();
       return;

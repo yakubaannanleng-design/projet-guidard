@@ -19,18 +19,6 @@ function sauvegarderPreferences() {
   catch (error) { console.error("Impossible de sauvegarder les préférences.", error); toast("Les préférences ne peuvent pas être sauvegardées sur cet appareil."); }
   appliquerPreferences();
 }
-const CATEGORIES_NUMERIQUES = [
-  { titre: "Salutations et expressions", icone: "💬", lecons: [0, 7] },
-  { titre: "Nombres", icone: "🔢", lecons: [1] },
-  { titre: "Famille", icone: "👨‍👩‍👧", lecons: [2] },
-  { titre: "Corps humain", icone: "🧍", lecons: [3] },
-  { titre: "Temps et moments de la journée", icone: "🕒", lecons: [4] },
-  { titre: "Jours de la semaine", icone: "📅", lecons: [5] },
-  { titre: "Mois de l’année", icone: "🗓️", lecons: [6] },
-  { titre: "Verbes et conjugaison", icone: "🗣️", lecons: [8] },
-  { titre: "Vocabulaire et culture", icone: "🌱", lecons: [9] },
-  { titre: "Dialogue", icone: "💬", lecons: [10] }
-];
 let quizSession = null;
 function echapperHtml(texte) {
   const remplacements = { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" };
@@ -274,17 +262,18 @@ function ouvrirAlphabet() {
 function afficherBibliotheque(filtre = "", categorieChoisie = -1) {
   if (document.getElementById("menu").style.display !== "flex") openMenu();
   const recherche = filtre.trim().toLocaleLowerCase("fr");
-  const categorie = CATEGORIES_NUMERIQUES[categorieChoisie];
-  const inclusions = categorie ? categorie.lecons : CATEGORIES_NUMERIQUES.flatMap(element => element.lecons);
-  const entrees = inclusions.flatMap(index => (LECONS[index]?.mots || []).map(mot => ({ mot, lecon: LECONS[index] })))
+  const inclusions = Number.isInteger(categorieChoisie) && categorieChoisie >= 0 && categorieChoisie < LECONS.length
+    ? [categorieChoisie]
+    : LECONS.map((_, index) => index);
+  const entrees = inclusions.flatMap(leconIndex => (LECONS[leconIndex]?.mots || []).map((mot, motIndex) => ({ mot, lecon: LECONS[leconIndex], leconIndex, motIndex })))
     .filter(({ mot }) => mot.g && mot.f && (mot.g.toLocaleLowerCase("fr").includes(recherche) || mot.f.toLocaleLowerCase("fr").includes(recherche)));
   const resultats = entrees.length
-    ? entrees.map(({ mot, lecon }) => '<article class="resource-result"><div class="resource-guidar">' + echapperHtml(mot.g) + '</div><div class="resource-translation">' + echapperHtml(mot.f) + '</div><div class="resource-meta">' + echapperHtml(lecon.titre) + (mot.pProvisoire ? ' · prononciation provisoire' : !mot.p ? ' · prononciation à compléter/valider' : '') + '</div></article>').join("")
+    ? entrees.map(({ mot, lecon, leconIndex, motIndex }) => '<article class="resource-result"><div class="resource-result-heading"><div class="resource-guidar">' + echapperHtml(mot.g) + '</div><button type="button" class="resource-play" onclick="lireEntree(' + leconIndex + ',' + motIndex + ')" aria-label="Écouter ' + echapperHtml(mot.g) + ' et sa traduction ' + echapperHtml(mot.f) + '" title="Écouter le mot et sa traduction"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4z"/><path d="M17 9a5 5 0 0 1 0 6M19 6a9 9 0 0 1 0 12"/></svg></button></div><div class="resource-translation">' + echapperHtml(mot.f) + '</div><div class="resource-meta">' + echapperHtml(lecon.titre) + (mot.pProvisoire ? ' · prononciation provisoire' : !mot.p ? ' · prononciation à compléter/valider' : '') + '</div></article>').join("")
     : '<p class="module-note">Aucun résultat pour cette recherche. Essayez un autre mot ou un autre thème.</p>';
-  const selecteur = '<label class="menu-section-title" for="resource-category">Thème</label><select class="resource-search" id="resource-category" aria-label="Filtrer par thème" onchange="afficherBibliotheque(document.getElementById(\'resource-search\').value, Number(this.value))"><option value="-1">Tous les thèmes</option>' +
-    CATEGORIES_NUMERIQUES.map((element, index) => '<option value="' + index + '" ' + (categorieChoisie === index ? 'selected' : '') + '>' + echapperHtml(element.titre) + '</option>').join("") + '</select>';
+  const selecteur = '<label class="menu-section-title" for="resource-category">Leçon</label><select class="resource-search" id="resource-category" aria-label="Filtrer par leçon" onchange="afficherBibliotheque(document.getElementById(\'resource-search\').value, Number(this.value))"><option value="-1">Toutes les leçons</option>' +
+    LECONS.map((lecon, index) => '<option value="' + index + '" ' + (categorieChoisie === index ? 'selected' : '') + '>' + echapperHtml(lecon.titre) + '</option>').join("") + '</select>';
   const rechercheHtml = '<label class="menu-section-title" for="resource-search">Recherche</label><input class="resource-search" id="resource-search" type="search" value="' + echapperHtml(filtre) + '" placeholder="Guidar ou français…" oninput="afficherBibliotheque(this.value, Number(document.getElementById(\'resource-category\').value))">';
-  afficherMenu("Bibliothèque numérique", '<div class="module-note">Contenus transcrits en texte à partir des ressources fournies, sans afficher les scans. Les graphies et traductions sont à valider par un spécialiste ; les prononciations manquantes sont signalées.</div>' + selecteur + rechercheHtml + '<p class="resource-meta" role="status">' + entrees.length + ' résultat(s)</p>' + resultats + '<button type="button" class="resource-back" onclick="openMenu()">← Retour au menu</button>');
+  afficherMenu("Bibliothèque numérique", '<div class="module-note">Ressources classées par leçon. Appuie sur le bouton haut-parleur de chaque mot pour écouter l’enregistrement Guidar, puis sa traduction. Si aucun enregistrement n’est disponible, une aide vocale de synthèse est proposée. Les graphies et traductions restent à valider par un spécialiste.</div>' + selecteur + rechercheHtml + '<p class="resource-meta" role="status">' + entrees.length + ' résultat(s)</p>' + resultats + '<button type="button" class="resource-back" onclick="openMenu()">← Retour au menu</button>');
   const champ = document.getElementById("resource-search"); champ.focus(); champ.setSelectionRange(champ.value.length, champ.value.length);
 }
 function ouvrirParametres() {
