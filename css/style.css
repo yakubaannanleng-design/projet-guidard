@@ -448,7 +448,7 @@ body.theme-dark{
   box-shadow:var(--shadow);touch-action:pan-y;
 }
 .main::before{
-  content:"À DÉCOUVRIR";position:absolute;top:18px;left:22px;
+  content:"À DÉCOUVRIR";align-self:flex-start;margin-left:2px;flex:0 0 auto;
   padding:5px 9px;border:1px solid var(--line);border-radius:999px;
   background:var(--surface-muted);color:var(--accent);
   font-size:9px;letter-spacing:1.1px;font-weight:750;
@@ -614,7 +614,6 @@ body.contraste-renforce .start-button,body.contraste-renforce .listen-button{col
   .quiz-category-title{font-size:11px;}
   .quiz-category-meta{font-size:9px;}
   .main{min-height:150px;margin-bottom:8px;border-radius:19px;}
-  .main::before{top:14px;left:17px;font-size:9px;}
   .bbar{min-height:66px;}
   .nav-item{min-width:49px;}
   .nav-item span{font-size:9px;}
@@ -627,5 +626,4 @@ body.contraste-renforce .start-button,body.contraste-renforce .listen-button{col
   .welcome-description{font-size:10px;line-height:1.4;}
   .welcome-card .start-button{min-height:36px;}
   .main{padding-top:30px;padding-bottom:18px;}
-  .main::before{top:10px;}
 }
