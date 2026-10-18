@@ -123,6 +123,13 @@ function ouvrirFenetreSection(section) {
     toast("La fenêtre n’a pas pu s’ouvrir. Autorise les fenêtres contextuelles pour cette application.");
   }
 }
+function actionBoutonEcouter() {
+  if (ecranFenetre === "lecteur") {
+    speak();
+    return;
+  }
+  ouvrirFenetreSection("lecteur");
+}
 function naviguerEcranFenetre(section) {
   if (!Object.prototype.hasOwnProperty.call(SECTIONS_FENETRE, section)) {
     console.error("Section GuidarApp inconnue.", section);
@@ -134,9 +141,15 @@ function naviguerEcranFenetre(section) {
   url.searchParams.set("ecran", section);
   window.history.replaceState(null, "", url);
   document.body.dataset.sectionWindow = section;
+  document.querySelectorAll("[data-window-section]").forEach(bouton => {
+    const actif = bouton.dataset.windowSection === section;
+    bouton.classList.toggle("active", actif);
+    if (actif) bouton.setAttribute("aria-current", "page");
+    else bouton.removeAttribute("aria-current");
+  });
   document.getElementById("section-toolbar").innerHTML = section === "accueil"
     ? ""
-    : '<button type="button" class="section-home-button" onclick="naviguerEcranFenetre(\'accueil\')" aria-label="Revenir à l’accueil">← Accueil</button><strong>' + SECTIONS_FENETRE[section] + '</strong>' +
+    : '<strong>' + SECTIONS_FENETRE[section] + '</strong>' +
       (section === "lecons" ? '<button type="button" class="section-action-button" onclick="openMenu()">Choisir une leçon</button>' : "") +
       (section === "lecteur" ? '<button type="button" class="section-action-button" onclick="openMenu()">Choisir une leçon</button><button type="button" class="section-action-button" onclick="speak()">🔊 Écouter</button>' : "");
   document.getElementById("section-toolbar").hidden = section === "accueil";
@@ -155,6 +168,7 @@ function naviguerEcranFenetre(section) {
 function initialiserSectionFenetre() {
   if (!Object.prototype.hasOwnProperty.call(SECTIONS_FENETRE, ecranFenetre)) {
     ecranFenetre = null;
+    document.body.querySelector('[data-window-section="accueil"]').setAttribute("aria-current", "page");
     return;
   }
   naviguerEcranFenetre(ecranFenetre);
