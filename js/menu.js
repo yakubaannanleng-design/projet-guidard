@@ -109,26 +109,12 @@ function commencerApprentissage() {
   document.getElementById("main").focus({ preventScroll: true });
   speak();
 }
-function ouvrirFenetreSection(section) {
-  if (!Object.prototype.hasOwnProperty.call(SECTIONS_FENETRE, section)) {
-    console.error("Section GuidarApp inconnue.", section);
-    toast("Impossible d’ouvrir cette section.");
-    return;
-  }
-  const url = new URL(window.location.href);
-  url.searchParams.set("ecran", section);
-  const fenetre = window.open(url.href, "guidar-" + section, "popup,width=980,height=820,resizable=yes,scrollbars=yes");
-  if (!fenetre) {
-    console.warn("Le navigateur a bloqué l’ouverture de la fenêtre GuidarApp.", section);
-    toast("La fenêtre n’a pas pu s’ouvrir. Autorise les fenêtres contextuelles pour cette application.");
-  }
-}
 function actionBoutonEcouter() {
   if (ecranFenetre === "lecteur") {
     speak();
     return;
   }
-  ouvrirFenetreSection("lecteur");
+  naviguerEcranFenetre("lecteur");
 }
 function naviguerEcranFenetre(section) {
   if (!Object.prototype.hasOwnProperty.call(SECTIONS_FENETRE, section)) {
@@ -174,6 +160,10 @@ function initialiserSectionFenetre() {
   naviguerEcranFenetre(ecranFenetre);
 }
 function retourAccueil() {
+  if (ecranFenetre) {
+    naviguerEcranFenetre("accueil");
+    return;
+  }
   masquerResultatsRecherche();
   if (document.getElementById("menu").style.display === "flex") closeMenu();
   document.getElementById("main").scrollTop = 0;
