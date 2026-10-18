@@ -1,11 +1,11 @@
 // MENU
 // ══════════════════════════════════════════════════
 function chargerPreferences() {
-  const defaut = { texteGrand: false, contraste: false, masquerPhon: false, vitesse: 1, theme: "light" };
+  const defaut = { texteGrand: false, contraste: false, masquerPhon: false, vitesse: 1, tailleTexte: 1, theme: "light" };
   try {
     const enregistre = JSON.parse(localStorage.getItem(CLE_PREFERENCES) || "null");
     if (!enregistre || typeof enregistre !== "object" || Array.isArray(enregistre)) return defaut;
-    return { texteGrand: enregistre.texteGrand === true, contraste: enregistre.contraste === true, masquerPhon: enregistre.masquerPhon === true, vitesse: Number.isFinite(enregistre.vitesse) ? Math.min(1.25, Math.max(0.75, enregistre.vitesse)) : 1, theme: enregistre.theme === "dark" ? "dark" : "light" };
+    return { texteGrand: enregistre.texteGrand === true, contraste: enregistre.contraste === true, masquerPhon: enregistre.masquerPhon === true, vitesse: Number.isFinite(enregistre.vitesse) ? Math.min(1.25, Math.max(0.75, enregistre.vitesse)) : 1, tailleTexte: Number.isFinite(enregistre.tailleTexte) ? Math.min(1.2, Math.max(0.85, enregistre.tailleTexte)) : 1, theme: enregistre.theme === "dark" ? "dark" : "light" };
   } catch (error) { console.error("Impossible de lire les préférences sauvegardées.", error); return defaut; }
 }
 function appliquerPreferences() {
@@ -13,11 +13,18 @@ function appliquerPreferences() {
   document.body.classList.toggle("contraste-renforce", preferences.contraste);
   document.body.classList.toggle("masquer-approximations", preferences.masquerPhon);
   document.body.classList.toggle("theme-dark", preferences.theme === "dark");
+  document.body.style.setProperty("--taille-texte", preferences.tailleTexte);
 }
 function sauvegarderPreferences() {
   try { localStorage.setItem(CLE_PREFERENCES, JSON.stringify(preferences)); }
   catch (error) { console.error("Impossible de sauvegarder les préférences.", error); toast("Les préférences ne peuvent pas être sauvegardées sur cet appareil."); }
   appliquerPreferences();
+}
+function reinitialiserPreferences() {
+  preferences = { texteGrand: false, contraste: false, masquerPhon: false, vitesse: 1, tailleTexte: 1, theme: "light" };
+  sauvegarderPreferences();
+  ouvrirParametres();
+  toast("Les réglages d’affichage ont été réinitialisés.");
 }
 let quizSession = null;
 let ecranFenetre = new URLSearchParams(window.location.search).get("ecran");
@@ -348,9 +355,10 @@ function ouvrirParametres() {
   const coche = (nom, titre, description, active) => '<label class="setting-row"><span><strong>' + titre + '</strong><br><small>' + description + '</small></span><input type="checkbox" aria-label="' + titre + '" ' + (active ? 'checked' : '') + ' onchange="preferences.' + nom + '=this.checked;sauvegarderPreferences()"></label>';
   afficherMenu("Paramètres et accessibilité", '<div class="module-note">Réglages enregistrés uniquement sur cet appareil.</div><div class="settings-list">' +
     '<div class="setting-row"><span><strong>Thème</strong><br><small>Choisis une apparence claire ou sombre.</small></span><div class="theme-choice"><button type="button" aria-pressed="' + (preferences.theme === "light") + '" onclick="preferences.theme=\'light\';sauvegarderPreferences();ouvrirParametres()">Clair</button><button type="button" aria-pressed="' + (preferences.theme === "dark") + '" onclick="preferences.theme=\'dark\';sauvegarderPreferences();ouvrirParametres()">Sombre</button></div></div>' +
+    '<label class="setting-row"><span><strong>Taille du texte</strong><br><small>Ajuster les mots, les traductions et les textes de l’application.</small></span><input type="range" min="0.85" max="1.2" step="0.05" value="' + preferences.tailleTexte + '" aria-label="Taille du texte" oninput="preferences.tailleTexte=Number(this.value);document.getElementById(\'taille-texte-affichee\').textContent=Math.round(preferences.tailleTexte*100)+\'%\';sauvegarderPreferences()"><span id="taille-texte-affichee" class="setting-value">' + Math.round(preferences.tailleTexte * 100) + '%</span></label>' +
     coche("texteGrand", "Texte agrandi", "Agrandir les mots et les traductions.", preferences.texteGrand) + coche("contraste", "Contraste renforcé", "Fond noir et texte plus contrasté.", preferences.contraste) + coche("masquerPhon", "Masquer les aides provisoires", "N’afficher que les prononciations confirmées.", preferences.masquerPhon) +
     '<label class="setting-row"><span><strong>Vitesse de lecture</strong><br><small>Ralentir ou accélérer la voix de synthèse.</small></span><input type="range" min="0.75" max="1.25" step="0.05" value="' + preferences.vitesse + '" aria-label="Vitesse de lecture" oninput="preferences.vitesse=Number(this.value);document.getElementById(\'vitesse-affichee\').textContent=Math.round(preferences.vitesse*100)+\'%\';sauvegarderPreferences()"><span id="vitesse-affichee" class="setting-value">' + Math.round(preferences.vitesse * 100) + '%</span></label></div>' +
-    '<p class="module-note">La synthèse vocale française de l’appareil sert d’aide et ne remplace pas un enregistrement Guidar validé.</p><br><button type="button" class="resource-back" onclick="openMenu()">← Retour au menu</button>');
+    '<p class="module-note">La synthèse vocale française de l’appareil sert d’aide et ne remplace pas un enregistrement Guidar validé.</p><button type="button" class="resource-back" onclick="reinitialiserPreferences()">Rétablir les réglages par défaut</button><br><button type="button" class="resource-back" onclick="openMenu()">← Retour au menu</button>');
 }
 function ouvrirClavierDepuisMenu() { closeMenu(); if (!kbOn) toggleKb(); }
 function openMenu() {
