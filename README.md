@@ -12,7 +12,7 @@ Le **Lecteur Guidar** s’affiche dans l’application et permet de choisir une 
 
 L’espace **Quiz**, accessible depuis la barre du bas ou le menu, classe les parcours par leçon et propose aussi une catégorie couvrant toutes les leçons. Chaque partie propose jusqu’à dix questions à choix multiples tirées des mots et traductions présents dans la catégorie. Le score est calculé à la fin de la partie. Comme le lexique attend une validation spécialisée, un rappel est affiché dans le quiz ; ses choix ne remplacent pas une validation linguistique.
 
-Dans **Paramètres et accessibilité**, le thème clair ou sombre, la taille du texte, le contraste, l’affichage des aides provisoires et la vitesse de lecture sont mémorisés sur l’appareil.
+Dans **Paramètres et accessibilité**, le thème clair ou sombre, la taille réglable du texte (85 à 120 %), le contraste, l’affichage des aides provisoires et la vitesse de lecture sont mémorisés sur l’appareil. Le bouton « Rétablir les réglages par défaut » permet d’annuler les personnalisations.
 
 ## Où modifier le programme
 
