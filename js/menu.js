@@ -20,6 +20,15 @@ function sauvegarderPreferences() {
   appliquerPreferences();
 }
 let quizSession = null;
+let ecranFenetre = new URLSearchParams(window.location.search).get("ecran");
+const SECTIONS_FENETRE = {
+  accueil: "Accueil",
+  lecons: "Leçons",
+  lecteur: "Lecteur Guidar",
+  ressources: "Ressources",
+  quiz: "Quiz",
+  compte: "Compte"
+};
 function echapperHtml(texte) {
   const remplacements = { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" };
   return String(texte).replace(/[&<>"']/g, caractere => remplacements[caractere]);
@@ -92,9 +101,63 @@ function ouvrirEntree(leconIndex, motIndex) {
   show(motIndex);
 }
 function commencerApprentissage() {
+  if (ecranFenetre === "accueil") {
+    naviguerEcranFenetre("lecons");
+    return;
+  }
   masquerResultatsRecherche();
   document.getElementById("main").focus({ preventScroll: true });
   speak();
+}
+function ouvrirFenetreSection(section) {
+  if (!Object.prototype.hasOwnProperty.call(SECTIONS_FENETRE, section)) {
+    console.error("Section GuidarApp inconnue.", section);
+    toast("Impossible d’ouvrir cette section.");
+    return;
+  }
+  const url = new URL(window.location.href);
+  url.searchParams.set("ecran", section);
+  const fenetre = window.open(url.href, "guidar-" + section, "popup,width=980,height=820,resizable=yes,scrollbars=yes");
+  if (!fenetre) {
+    console.warn("Le navigateur a bloqué l’ouverture de la fenêtre GuidarApp.", section);
+    toast("La fenêtre n’a pas pu s’ouvrir. Autorise les fenêtres contextuelles pour cette application.");
+  }
+}
+function naviguerEcranFenetre(section) {
+  if (!Object.prototype.hasOwnProperty.call(SECTIONS_FENETRE, section)) {
+    console.error("Section GuidarApp inconnue.", section);
+    toast("Impossible d’ouvrir cette section.");
+    return;
+  }
+  ecranFenetre = section;
+  const url = new URL(window.location.href);
+  url.searchParams.set("ecran", section);
+  window.history.replaceState(null, "", url);
+  document.body.dataset.sectionWindow = section;
+  document.getElementById("section-toolbar").innerHTML = section === "accueil"
+    ? ""
+    : '<button type="button" class="section-home-button" onclick="naviguerEcranFenetre(\'accueil\')" aria-label="Revenir à l’accueil">← Accueil</button><strong>' + SECTIONS_FENETRE[section] + '</strong>' +
+      (section === "lecons" ? '<button type="button" class="section-action-button" onclick="openMenu()">Choisir une leçon</button>' : "") +
+      (section === "lecteur" ? '<button type="button" class="section-action-button" onclick="openMenu()">Choisir une leçon</button><button type="button" class="section-action-button" onclick="speak()">🔊 Écouter</button>' : "");
+  document.getElementById("section-toolbar").hidden = section === "accueil";
+  if (document.getElementById("menu").style.display === "flex") closeMenu();
+  if (section === "ressources") {
+    openMenu();
+    afficherBibliotheque();
+  } else if (section === "quiz") {
+    openMenu();
+    ouvrirQuiz();
+  } else if (section === "compte") {
+    openMenu();
+    afficherMenu("Compte", '<div class="module-note"><strong>L’espace compte sera disponible dans une prochaine version.</strong><br>Pour le moment, la progression et les préférences restent enregistrées sur cet appareil, sans compte ni connexion.</div>');
+  }
+}
+function initialiserSectionFenetre() {
+  if (!Object.prototype.hasOwnProperty.call(SECTIONS_FENETRE, ecranFenetre)) {
+    ecranFenetre = null;
+    return;
+  }
+  naviguerEcranFenetre(ecranFenetre);
 }
 function retourAccueil() {
   masquerResultatsRecherche();
@@ -320,6 +383,11 @@ function retourEcranPrecedent() {
     return;
   }
   if (titre === "Menu d’apprentissage") {
+    if (ecranFenetre) {
+      if (["ressources", "quiz", "compte"].includes(ecranFenetre)) naviguerEcranFenetre("accueil");
+      else closeMenu();
+      return;
+    }
     closeMenu();
     return;
   }
@@ -329,7 +397,7 @@ function closeMenu() {
   const menu = document.getElementById("menu");
   const cibleFocus = focusAvantMenu && !menu.contains(focusAvantMenu)
     ? focusAvantMenu
-    : document.querySelector(".nav-item");
+    : ecranFenetre ? document.getElementById("main") : document.querySelector(".nav-item");
   menu.style.display = "none";
   menu.setAttribute("aria-hidden", "true");
   if (cibleFocus && cibleFocus.focus) cibleFocus.focus();
@@ -347,7 +415,7 @@ function chooseLecon(i) {
   stopAudio();
   if (VOIX_OK) window.speechSynthesis.cancel();
   curL = i; curM = 0;
-  focusAvantMenu = document.querySelector(".bbar button");
+  focusAvantMenu = ecranFenetre ? document.getElementById("main") : document.querySelector(".bbar button");
   closeMenu();
   document.getElementById("hdr-lecon").textContent = LECONS[i].titre;
   show(0);

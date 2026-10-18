@@ -35,8 +35,8 @@ function show(idx) {
   const main = document.getElementById("main");
   const navigationMots = `
     <div class="word-navigation" aria-label="Navigation entre les mots de la leçon">
-      <button type="button" onclick="go(-1)" aria-label="Mot précédent">← Précédent</button>
-      <button type="button" onclick="go(1)" aria-label="Mot suivant">Suivant →</button>
+      <button type="button" onclick="go(-1)" aria-label="Mot précédent" title="Mot précédent"><span aria-hidden="true">◀</span></button>
+      <button type="button" onclick="go(1)" aria-label="Mot suivant" title="Mot suivant"><span aria-hidden="true">▶</span></button>
     </div>`;
   vus[leconIndex] = Math.max(vus[leconIndex] || 0, idx + 1);
   sauvegarderProgression();

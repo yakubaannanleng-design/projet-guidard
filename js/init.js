@@ -11,3 +11,4 @@ if (!LECONS[curL].mots[curM]?.g) {
 }
 document.getElementById("hdr-lecon").textContent = LECONS[curL].titre;
 show(curM);
+initialiserSectionFenetre();
