@@ -365,49 +365,73 @@ function ouvrirAlphabet() {
     '<div class="module-note"><strong>Parcours à compléter avec le spécialiste :</strong><br>ordre de l’alphabet · nom et son des lettres · voyelles et consonnes · syllabes simples puis combinées · exemples et enregistrements. Aucun son non confirmé n’est enseigné ici.</div>' +
     '<p class="content-status">Fondations en préparation et à valider</p><br><br><button type="button" class="resource-back" onclick="openMenu()">← Retour au menu</button>', "alphabet");
 }
-function afficherBibliotheque(filtre = "", categorieChoisie = -1) {
-  if (document.getElementById("menu").style.display !== "flex") openMenu();
-  const recherche = filtre.trim().toLocaleLowerCase("fr");
+function entreesBibliotheque(filtre, categorieChoisie) {
+  const recherche = normaliserTexte(filtre.trim());
   const inclusions = Number.isInteger(categorieChoisie) && categorieChoisie >= 0 && categorieChoisie < LECONS.length
     ? [categorieChoisie]
     : LECONS.map((_, index) => index);
-  const entrees = inclusions.flatMap(leconIndex => (LECONS[leconIndex]?.mots || []).map((mot, motIndex) => ({ mot, lecon: LECONS[leconIndex], leconIndex, motIndex })))
-    .filter(({ mot }) => mot.g && mot.f && (mot.g.toLocaleLowerCase("fr").includes(recherche) || mot.f.toLocaleLowerCase("fr").includes(recherche)));
-  const resultats = entrees.length
-    ? entrees.map(({ mot, lecon, leconIndex, motIndex }) => '<article class="resource-result"><div class="resource-result-heading"><div class="resource-guidar">' + echapperHtml(mot.g) + '</div><button type="button" class="resource-play" onclick="lireEntree(' + leconIndex + ',' + motIndex + ')" aria-label="Écouter ' + echapperHtml(mot.g) + ' et sa traduction ' + echapperHtml(mot.f) + '" title="Écouter le mot et sa traduction"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4z"/><path d="M17 9a5 5 0 0 1 0 6M19 6a9 9 0 0 1 0 12"/></svg></button></div><div class="resource-translation">' + echapperHtml(mot.f) + '</div><div class="resource-meta">' + echapperHtml(lecon.titre) + (mot.pProvisoire ? ' · prononciation provisoire' : !mot.p ? ' · prononciation à compléter/valider' : '') + '</div></article>').join("")
-    : '<p class="module-note">Aucun résultat pour cette recherche. Essayez un autre mot ou un autre thème.</p>';
-  const selecteur = '<label class="menu-section-title" for="resource-category">Leçon</label><select class="resource-search" id="resource-category" aria-label="Filtrer par leçon" onchange="afficherBibliotheque(document.getElementById(\'resource-search\').value, Number(this.value))"><option value="-1">Toutes les leçons</option>' +
+  return inclusions.flatMap(leconIndex => (LECONS[leconIndex]?.mots || []).map((mot, motIndex) => ({ mot, lecon: LECONS[leconIndex], leconIndex, motIndex })))
+    .filter(({ mot }) => mot.g && mot.f && (normaliserTexte(mot.g).includes(recherche) || normaliserTexte(mot.f).includes(recherche)));
+}
+function afficherBibliotheque(filtre = "", categorieChoisie = -1) {
+  if (!menuOuvert) openMenu();
+  const selecteur = '<label class="menu-section-title" for="resource-category">Leçon</label><select class="resource-search" id="resource-category" aria-label="Filtrer par leçon" onchange="majResultatsBibliotheque(document.getElementById(\'resource-search\').value, Number(this.value))"><option value="-1">Toutes les leçons</option>' +
     LECONS.map((lecon, index) => '<option value="' + index + '" ' + (categorieChoisie === index ? 'selected' : '') + '>' + echapperHtml(lecon.titre) + '</option>').join("") + '</select>';
-  const rechercheHtml = '<label class="menu-section-title" for="resource-search">Recherche</label><input class="resource-search" id="resource-search" type="search" value="' + echapperHtml(filtre) + '" placeholder="Guidar ou français…" oninput="afficherBibliotheque(this.value, Number(document.getElementById(\'resource-category\').value))">';
-  afficherMenu("Bibliothèque numérique", '<div class="module-note">Ressources classées par leçon. Appuie sur le bouton haut-parleur de chaque mot pour écouter l’enregistrement Guidar, puis sa traduction. Si aucun enregistrement n’est disponible, une aide vocale de synthèse est proposée. Les graphies et traductions restent à valider par un spécialiste.</div>' + selecteur + rechercheHtml + '<p class="resource-meta" role="status">' + entrees.length + ' résultat(s)</p>' + resultats + '<button type="button" class="resource-back" onclick="openMenu()">← Retour au menu</button>');
-  const champ = document.getElementById("resource-search"); champ.focus(); champ.setSelectionRange(champ.value.length, champ.value.length);
+  const rechercheHtml = '<label class="menu-section-title" for="resource-search">Recherche</label><input class="resource-search" id="resource-search" type="search" value="' + echapperHtml(filtre) + '" placeholder="Guidar ou français…" oninput="majResultatsBibliotheque(this.value, Number(document.getElementById(\'resource-category\').value))">';
+  afficherMenu("Bibliothèque numérique", '<div class="module-note">Ressources classées par leçon. Appuie sur le bouton haut-parleur pour écouter l’enregistrement Guidar, puis sa traduction. Tant que l’enregistrement manque, seule la traduction française est lue.</div>' +
+    selecteur + rechercheHtml + '<p class="resource-meta" id="resource-count" role="status"></p><div id="resource-results"></div>' +
+    '<button type="button" class="resource-back" onclick="openMenu()">← Retour au menu</button>', "bibliotheque");
+  majResultatsBibliotheque(filtre, categorieChoisie);
+  const champ = document.getElementById("resource-search");
+  if (champ) {
+    champ.focus();
+    champ.setSelectionRange(champ.value.length, champ.value.length);
+  }
+}
+function majResultatsBibliotheque(filtre, categorieChoisie) {
+  const conteneur = document.getElementById("resource-results");
+  const compteur = document.getElementById("resource-count");
+  if (!conteneur) return;
+  const entrees = entreesBibliotheque(filtre, categorieChoisie);
+  conteneur.innerHTML = entrees.length
+    ? entrees.map(({ mot, lecon, leconIndex, motIndex }) => {
+      const audio = etatAudio(leconIndex, motIndex);
+      const etatAudioTexte = audio.etat === "disponible"
+        ? "enregistrement disponible"
+        : audio.etat === "desaligne" ? "enregistrement à revérifier" : "enregistrement à venir";
+      return '<article class="resource-result"><div class="resource-result-heading"><div class="resource-guidar">' + echapperHtml(mot.g) + '</div><button type="button" class="resource-play" onclick="lireEntree(' + leconIndex + ',' + motIndex + ', null, true)" aria-label="Écouter ' + echapperHtml(mot.g) + ' et sa traduction ' + echapperHtml(mot.f) + '" title="Écouter le mot et sa traduction"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4z"/><path d="M17 9a5 5 0 0 1 0 6M19 6a9 9 0 0 1 0 12"/></svg></button></div><div class="resource-translation">' + echapperHtml(mot.f) + '</div><div class="resource-meta">' + echapperHtml(lecon.titre) + ' · ' + etatAudioTexte + (mot.pProvisoire ? ' · prononciation provisoire' : !mot.p ? ' · prononciation à compléter/valider' : '') + '</div></article>';
+    }).join("")
+    : '<p class="module-note">Aucun résultat pour cette recherche. Essayez un autre mot ou un autre thème.</p>';
+  if (compteur) compteur.textContent = entrees.length + " résultat(s)";
 }
 function ouvrirParametres() {
-  if (document.getElementById("menu").style.display !== "flex") openMenu();
+  if (!menuOuvert) openMenu();
   const switcher = (nom, titre, description, active, symbole) => '<label class="settings-row"><span class="settings-icon" aria-hidden="true">' + symbole + '</span><span class="settings-copy"><strong>' + titre + '</strong><small>' + description + '</small></span><input type="checkbox" aria-label="' + titre + '" ' + (active ? 'checked' : '') + ' onchange="preferences.' + nom + '=this.checked;sauvegarderPreferences()"></label>';
   const groupe = (titre, contenu) => '<section class="settings-group"><h2>' + titre + '</h2><div class="settings-card">' + contenu + '</div></section>';
   const theme = '<div class="settings-row"><span class="settings-icon" aria-hidden="true">◐</span><span class="settings-copy"><strong>Thème</strong><small>Choisis une apparence claire ou sombre.</small></span><div class="theme-choice"><button type="button" aria-pressed="' + (preferences.theme === "light") + '" onclick="preferences.theme=\'light\';sauvegarderPreferences();ouvrirParametres()">Clair</button><button type="button" aria-pressed="' + (preferences.theme === "dark") + '" onclick="preferences.theme=\'dark\';sauvegarderPreferences();ouvrirParametres()">Sombre</button></div></div>';
   const taille = '<label class="settings-row"><span class="settings-icon" aria-hidden="true">A</span><span class="settings-copy"><strong>Taille du texte</strong><small>Ajuste la lecture des mots et des traductions.</small></span><input type="range" min="0.85" max="1.2" step="0.05" value="' + preferences.tailleTexte + '" aria-label="Taille du texte" oninput="preferences.tailleTexte=Number(this.value);document.getElementById(\'taille-texte-affichee\').textContent=Math.round(preferences.tailleTexte*100)+\'%\';sauvegarderPreferences()"><span id="taille-texte-affichee" class="setting-value">' + Math.round(preferences.tailleTexte * 100) + '%</span></label>';
-  const vitesse = '<label class="settings-row"><span class="settings-icon" aria-hidden="true">♫</span><span class="settings-copy"><strong>Vitesse de lecture</strong><small>Règle la vitesse de la voix de synthèse.</small></span><input type="range" min="0.75" max="1.25" step="0.05" value="' + preferences.vitesse + '" aria-label="Vitesse de lecture" oninput="preferences.vitesse=Number(this.value);document.getElementById(\'vitesse-affichee\').textContent=Math.round(preferences.vitesse*100)+\'%\';sauvegarderPreferences()"><span id="vitesse-affichee" class="setting-value">' + Math.round(preferences.vitesse * 100) + '%</span></label>';
+  const vitesse = '<label class="settings-row"><span class="settings-icon" aria-hidden="true">♫</span><span class="settings-copy"><strong>Vitesse de lecture</strong><small>Règle la vitesse des enregistrements et de la voix de synthèse.</small></span><input type="range" min="0.75" max="1.25" step="0.05" value="' + preferences.vitesse + '" aria-label="Vitesse de lecture" oninput="preferences.vitesse=Number(this.value);document.getElementById(\'vitesse-affichee\').textContent=Math.round(preferences.vitesse*100)+\'%\';sauvegarderPreferences()"><span id="vitesse-affichee" class="setting-value">' + Math.round(preferences.vitesse * 100) + '%</span></label>';
+  const approximation = switcher("approximationVocale", "Prononciation approximative", "Quand un enregistrement manque, lire l’aide de prononciation avec la voix de synthèse française. À laisser désactivé : cette voix ne prononce pas le Guidar.", preferences.approximationVocale, "◑");
   const contenu = '<div class="settings-intro">Personnalise ton expérience. Ces réglages restent enregistrés sur cet appareil.</div>' +
     groupe("Affichage", theme + taille) +
     groupe("Accessibilité", switcher("texteGrand", "Texte agrandi", "Agrandir les mots et leur traduction.", preferences.texteGrand, "↕") + switcher("contraste", "Contraste renforcé", "Améliorer la lisibilité des éléments.", preferences.contraste, "◑")) +
-    groupe("Apprentissage", vitesse + switcher("masquerPhon", "Masquer les aides provisoires", "Afficher uniquement les prononciations confirmées.", preferences.masquerPhon, "◉")) +
+    groupe("Apprentissage", vitesse + approximation + switcher("masquerPhon", "Masquer les aides provisoires", "Afficher uniquement les prononciations confirmées.", preferences.masquerPhon, "◉")) +
     '<p class="settings-note">La voix française de synthèse est une aide ; elle ne remplace pas un enregistrement Guidar validé.</p><button type="button" class="resource-back" onclick="reinitialiserPreferences()">Rétablir les réglages par défaut</button><button type="button" class="resource-back" onclick="openMenu()">← Retour au menu</button>';
-  afficherMenu("Paramètres", contenu);
+  afficherMenu("Paramètres", contenu, "parametres");
 }
 function ouvrirClavierDepuisMenu() { closeMenu(); if (!kbOn) toggleKb(); }
 function ouvrirLeconsMenu() {
-  if (document.getElementById("menu").style.display !== "flex") openMenu();
+  if (!menuOuvert) openMenu();
   const lecons = LECONS.map((lecon, index) => {
     const nombreVu = Math.min(vus[index] || 0, lecon.mots.length);
     const terminee = lecon.mots.length > 1 && nombreVu === lecon.mots.length;
     const audiosValides = lecon.mots.filter((mot, motIndex) => mot.g && validationsAudio[cleValidationAudio(index, motIndex)] === "conforme").length;
     const nombreAudios = lecon.mots.filter(mot => mot.g).length;
+    const proportion = proportionAudioLecon(index);
     const actif = index === curL;
-    return '<button type="button" class="menu-item" onclick="chooseLecon(' + index + ')" ' + (actif ? 'aria-current="page"' : '') + ' style="background:' + (actif ? 'var(--accent-soft)' : 'var(--surface)') + ';border:1px solid ' + (actif ? 'var(--accent)' : 'var(--line)') + '"><span class="mi-ico">' + echapperHtml(lecon.icone || "📘") + '</span><div class="mi-txt"><div class="mi-titre">' + echapperHtml(lecon.titre) + '</div><div class="mi-count">' + nombreVu + ' / ' + lecon.mots.length + ' entrée(s) vues' + (terminee ? ' — Leçon terminée ✓' : '') + '</div><div class="mi-count">' + audiosValides + ' / ' + nombreAudios + ' audio(s) confirmé(s)</div></div>' + (actif ? '<span class="mi-check">✓</span>' : '<span class="menu-index-arrow" aria-hidden="true">›</span>') + '</button>';
+    return '<button type="button" class="menu-item" onclick="chooseLecon(' + index + ')" ' + (actif ? 'aria-current="page"' : '') + ' style="background:' + (actif ? 'var(--accent-soft)' : 'var(--surface)') + ';border:1px solid ' + (actif ? 'var(--accent)' : 'var(--line)') + '"><span class="mi-ico">' + echapperHtml(lecon.icone || "📘") + '</span><div class="mi-txt"><div class="mi-titre">' + echapperHtml(lecon.titre) + '</div><div class="mi-count">' + nombreVu + ' / ' + lecon.mots.length + ' entrée(s) vues' + (terminee ? ' — Leçon terminée ✓' : '') + '</div><div class="mi-count">' + proportion.disponibles + ' / ' + proportion.total + ' enregistrement(s) disponible(s)</div><div class="mi-count">' + audiosValides + ' / ' + nombreAudios + ' audio(s) confirmé(s)</div></div>' + (actif ? '<span class="mi-check">✓</span>' : '<span class="menu-index-arrow" aria-hidden="true">›</span>') + '</button>';
   }).join("");
-  afficherMenu("Choisir une leçon", '<p class="menu-subtitle">Parcours les leçons et reprends où tu veux.</p>' + lecons + '<button type="button" class="resource-back" onclick="openMenu()">← Menu principal</button>');
+  afficherMenu("Choisir une leçon", '<p class="menu-subtitle">Parcours les leçons et reprends où tu veux.</p>' + lecons + '<button type="button" class="resource-back" onclick="openMenu()">← Menu principal</button>', "lecons");
 }
 function openMenu() {
   if (document.getElementById("menu").style.display !== "flex") focusAvantMenu = document.activeElement;
