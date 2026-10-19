@@ -113,6 +113,106 @@ verifier("recherche « salut » trouve des résultats", contexte.entreesBiblioth
 verifier("recherche sans résultat renvoie 0", contexte.entreesBibliotheque("zzzzzz", -1).length === 0);
 verifier("filtre par leçon 5 limité à la leçon 5", contexte.entreesBibliotheque("", 4).every(e => e.leconIndex === 4));
 
+// ══════════════════════════════════════════════════
+// 3. RENDU DES ÉCRANS (simulation DOM légère)
+// ══════════════════════════════════════════════════
+console.log("\nRENDU DES ÉCRANS");
+const elements = new Map();
+function element(id) {
+  if (!elements.has(id)) {
+    elements.set(id, {
+      id, innerHTML: "", textContent: "", value: "", hidden: false, scrollTop: 0,
+      type: "", tagName: "DIV", isContentEditable: false,
+      style: { setProperty() {}, display: "" }, dataset: {},
+      classList: { _c: new Set(), toggle(c, v) { v ? this._c.add(c) : this._c.delete(c); }, add(c) { this._c.add(c); }, remove(c) { this._c.delete(c); }, contains(c) { return this._c.has(c); } },
+      attributes: {},
+      setAttribute(n, v) { this.attributes[n] = v; },
+      getAttribute(n) { return this.attributes[n] ?? null; },
+      hasAttribute(n) { return n in this.attributes; },
+      removeAttribute(n) { delete this.attributes[n]; },
+      focus() {}, blur() {}, select() {}, setSelectionRange() {},
+      addEventListener() {}, removeEventListener() {}, appendChild() {}, remove() {},
+      contains() { return false; },
+      querySelector() { return element("inner"); },
+      querySelectorAll() { return []; },
+      closest() { return null; }
+    });
+  }
+  return elements.get(id);
+}
+const contexteRendu = {
+  console,
+  setTimeout: (fn) => { try { fn(); } catch (erreur) { contexteRendu._erreurs.push(erreur); } return 0; },
+  clearTimeout: () => {}, requestAnimationFrame: (fn) => fn(),
+  URL, URLSearchParams, Math, Date, JSON,
+  getComputedStyle: () => ({ transform: "none" }),
+  SpeechSynthesisUtterance: function (texte) { this.texte = texte; },
+  localStorage: { getItem: () => null, setItem() {}, removeItem() {} },
+  navigator: {},
+  Audio: function () { return { play: () => Promise.resolve(), load() {}, addEventListener() {}, pause() {}, removeAttribute() {}, set playbackRate(v) {}, get playbackRate() { return 1; } }; },
+  document: {
+    getElementById: (id) => element(id),
+    querySelector: (sel) => element("q:" + sel),
+    querySelectorAll: (sel) => sel.includes(".hdr")
+      ? ["hdr", "search-area", "welcome-card", "home-dashboard", "main", "bbar", "keyboard"].map(element)
+      : [],
+    createElement: () => element("tmp"),
+    addEventListener: () => {},
+    body: element("body"),
+    activeElement: null
+  },
+  window: {
+    location: { search: "", href: "http://localhost/guidar-final.html" },
+    speechSynthesis: { getVoices: () => [], speak() {}, cancel() {}, addEventListener: () => {} },
+    addEventListener: () => {},
+    history: { replaceState() {} }
+  },
+  toast: () => {},
+  _erreurs: []
+};
+vm.createContext(contexteRendu);
+for (const fichier of ["js/data.js", "js/audio-manifest.js", "js/menu.js", "js/state.js", "js/player.js", "js/audio.js", "js/keyboard.js"]) {
+  vm.runInContext(lire(fichier), contexteRendu, { filename: fichier });
+}
+function essayer(nom, action) {
+  try { action(); reussis++; console.log("  ok   " + nom); }
+  catch (erreur) { echecs++; console.log("  ÉCHEC " + nom + " → " + erreur.message); }
+}
+essayer("démarrage de l’application", () => { vm.runInContext(lire("js/init.js"), contexteRendu, { filename: "js/init.js" }); });
+essayer("affichage d’une entrée", () => { contexteRendu.show(1); });
+verifier("le mot et son état d’enregistrement sont affichés", element("main").innerHTML.includes("statut-audio"));
+verifier("le nom du fichier audio est proposé", element("main").innerHTML.includes("lecon1_001.mp3"));
+essayer("navigation entre les entrées", () => { contexteRendu.go(1); contexteRendu.go(-1); });
+essayer("ouverture du menu", () => { contexteRendu.openMenu(); });
+verifier("le fond devient inactif pendant le menu", element("main").hasAttribute("inert"));
+essayer("fermeture du menu", () => { contexteRendu.closeMenu(); });
+verifier("le fond redevient actif", !element("main").hasAttribute("inert"));
+essayer("choix d’une leçon", () => { contexteRendu.ouvrirLeconsMenu(); });
+verifier("la progression audio par leçon est affichée", element("menu-liste").innerHTML.includes("enregistrement(s) disponible(s)"));
+essayer("bibliothèque numérique", () => { contexteRendu.afficherBibliotheque(); });
+verifier("la bibliothèque affiche des résultats", element("resource-results").innerHTML.includes("resource-result"));
+essayer("filtre de la bibliothèque", () => { contexteRendu.majResultatsBibliotheque("salut", 0); });
+verifier("le compteur de résultats est mis à jour", /résultat\(s\)/.test(element("resource-count").textContent));
+essayer("quiz", () => { contexteRendu.ouvrirQuiz(); contexteRendu.demarrerQuiz(0); });
+verifier("une question de quiz est posée", element("menu-liste").innerHTML.includes("quiz-question"));
+essayer("paramètres", () => { contexteRendu.ouvrirParametres(); });
+verifier("le réglage de prononciation approximative existe", element("menu-liste").innerHTML.includes("approximationVocale"));
+essayer("sections de l’application", () => {
+  contexteRendu.naviguerEcranFenetre("lecons");
+  verifier("le bouton « Choisir une leçon » ouvre la liste des leçons", element("section-toolbar").innerHTML.includes("ouvrirLeconsMenu()"), element("section-toolbar").innerHTML);
+  contexteRendu.naviguerEcranFenetre("accueil");
+  contexteRendu.naviguerEcranFenetre("compte");
+  contexteRendu.naviguerEcranFenetre("quiz");
+});
+essayer("recherche globale", () => { contexteRendu.rechercherApplication("salut"); });
+verifier("la recherche propose des résultats", element("search-results").innerHTML.includes("search-result"));
+essayer("lecture d’une entrée avec enregistrement", () => { contexteRendu.lireEntree(0, 1, () => {}); });
+essayer("lecture d’une entrée sans enregistrement", () => { contexteRendu.lireEntree(4, 1, () => {}); });
+if (contexteRendu._erreurs.length) {
+  echecs++;
+  console.log("  ÉCHEC erreurs asynchrones pendant le rendu : " + contexteRendu._erreurs.map(e => e.message).join(" | "));
+}
+
 console.log("\n" + reussis + " contrôle(s) réussi(s), " + echecs + " échec(s).");
 console.log(`Couverture audio : ${couverts}/${totalEntrees} entrées (${totalEntrees ? Math.round(couverts / totalEntrees * 100) : 0} %).`);
 if (echecs) process.exitCode = 1;
