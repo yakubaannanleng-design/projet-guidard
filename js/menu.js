@@ -492,11 +492,13 @@ function chooseLecon(i) {
   speechRun++;
   stopAudio();
   if (VOIX_OK) window.speechSynthesis.cancel();
-  curL = i; curM = 0;
+  curL = i;
+  const premiereEntree = LECONS[i].mots.findIndex(mot => mot.g);
+  curM = premiereEntree >= 0 ? premiereEntree : 0;
   focusAvantMenu = ecranFenetre ? document.getElementById("main") : document.querySelector(".bbar button");
   closeMenu();
   document.getElementById("hdr-lecon").textContent = LECONS[i].titre;
-  show(0);
+  show(curM);
 }
 
 // ══════════════════════════════════════════════════
