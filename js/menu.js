@@ -1,11 +1,11 @@
 // MENU
 // ══════════════════════════════════════════════════
 function chargerPreferences() {
-  const defaut = { texteGrand: false, contraste: false, masquerPhon: false, vitesse: 1, tailleTexte: 1, theme: "light" };
+  const defaut = { texteGrand: false, contraste: false, masquerPhon: false, approximationVocale: false, vitesse: 1, tailleTexte: 1, theme: "light" };
   try {
     const enregistre = JSON.parse(localStorage.getItem(CLE_PREFERENCES) || "null");
     if (!enregistre || typeof enregistre !== "object" || Array.isArray(enregistre)) return defaut;
-    return { texteGrand: enregistre.texteGrand === true, contraste: enregistre.contraste === true, masquerPhon: enregistre.masquerPhon === true, vitesse: Number.isFinite(enregistre.vitesse) ? Math.min(1.25, Math.max(0.75, enregistre.vitesse)) : 1, tailleTexte: Number.isFinite(enregistre.tailleTexte) ? Math.min(1.2, Math.max(0.85, enregistre.tailleTexte)) : 1, theme: enregistre.theme === "dark" ? "dark" : "light" };
+    return { texteGrand: enregistre.texteGrand === true, contraste: enregistre.contraste === true, masquerPhon: enregistre.masquerPhon === true, approximationVocale: enregistre.approximationVocale === true, vitesse: Number.isFinite(enregistre.vitesse) ? Math.min(1.25, Math.max(0.75, enregistre.vitesse)) : 1, tailleTexte: Number.isFinite(enregistre.tailleTexte) ? Math.min(1.2, Math.max(0.85, enregistre.tailleTexte)) : 1, theme: enregistre.theme === "dark" ? "dark" : "light" };
   } catch (error) { console.error("Impossible de lire les préférences sauvegardées.", error); return defaut; }
 }
 function appliquerPreferences() {
@@ -21,12 +21,14 @@ function sauvegarderPreferences() {
   appliquerPreferences();
 }
 function reinitialiserPreferences() {
-  preferences = { texteGrand: false, contraste: false, masquerPhon: false, vitesse: 1, tailleTexte: 1, theme: "light" };
+  preferences = { texteGrand: false, contraste: false, masquerPhon: false, approximationVocale: false, vitesse: 1, tailleTexte: 1, theme: "light" };
   sauvegarderPreferences();
   ouvrirParametres();
   toast("Les réglages d’affichage ont été réinitialisés.");
 }
 let quizSession = null;
+let menuOuvert = false;
+let vueMenu = "menu";
 let ecranFenetre = new URLSearchParams(window.location.search).get("ecran");
 const SECTIONS_FENETRE = {
   accueil: "Accueil",
@@ -40,10 +42,17 @@ function echapperHtml(texte) {
   const remplacements = { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" };
   return String(texte).replace(/[&<>"']/g, caractere => remplacements[caractere]);
 }
-function afficherMenu(titre, contenu) {
+function afficherMenu(titre, contenu, vue) {
   document.getElementById("menu-titre").textContent = titre;
   document.getElementById("menu-liste").innerHTML = contenu;
   document.getElementById("menu-liste").scrollTop = 0;
+  vueMenu = vue || "menu";
+}
+function normaliserTexte(texte) {
+  return String(texte || "")
+    .toLocaleLowerCase("fr")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 }
 function masquerResultatsRecherche() {
   const resultats = document.getElementById("search-results");

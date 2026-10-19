@@ -27,9 +27,12 @@ function obtenirPhonetique(mot) {
 // ══════════════════════════════════════════════════
 // AFFICHAGE
 // ══════════════════════════════════════════════════
+let jetonRendu = 0;
+
 function show(idx) {
   const leconIndex = curL;
   curM = idx;
+  const jeton = ++jetonRendu;
   const mots = LECONS[leconIndex].mots;
   const m    = mots[idx];
   const main = document.getElementById("main");
@@ -45,10 +48,10 @@ function show(idx) {
   main.querySelectorAll(".wg,.wf,.note-card").forEach(el => el.classList.add("fade"));
 
   setTimeout(() => {
-    if (curL !== leconIndex || curM !== idx) return;
+    if (jeton !== jetonRendu) return;
     if (!m.g) {
       // Mot note/titre — pas de texte Guidar
-      main.innerHTML = `<div class="note-card">${m.f}</div>${navigationMots}`;
+      main.innerHTML = `<div class="note-card">${echapperHtml(m.f)}</div>${navigationMots}`;
     } else {
       const cleAudio = cleValidationAudio(leconIndex, idx);
       const audioConforme = validationsAudio[cleAudio] === "conforme";
@@ -58,24 +61,19 @@ function show(idx) {
         ? '<p class="entry-validation">Transcription initiale : graphie et traduction à valider par un spécialiste.</p>'
         : "";
       main.innerHTML = `
-        <div class="wg">${m.g}</div>
-        ${phonetique ? `<div class="prononciation${phonetique.provisoire ? " prononciation-provisoire" : ""}" aria-label="${phonetique.provisoire ? "Aide de prononciation approximative, à valider" : "Aide de prononciation"}">${phonetique.texte}</div>` : ""}
+        <div class="wg">${echapperHtml(m.g)}</div>
+        ${phonetique ? `<div class="prononciation${phonetique.provisoire ? " prononciation-provisoire" : ""}" aria-label="${phonetique.provisoire ? "Aide de prononciation approximative, à valider" : "Aide de prononciation"}">${echapperHtml(phonetique.texte)}</div>` : ""}
         <div class="sep"></div>
-        <div class="wf">${m.f}</div>
+        <div class="wf">${echapperHtml(m.f)}</div>
+        ${statutAudioHtml(leconIndex, idx)}
         ${navigationMots}
         ${noteValidation}
-        <div class="audio-validation"><details>
-          <summary>Vérifier l’enregistrement</summary>
-          <div class="audio-validation-label">Après écoute, indique si l’enregistrement correspond à cette entrée.</div>
-          <button type="button" data-validation="conforme" onclick="marquerValidationAudio('conforme')"
-            class="${audioConforme ? "on" : ""}" aria-pressed="${audioConforme}">✓ Correspond</button>
-          <button type="button" data-validation="corriger" onclick="marquerValidationAudio('corriger')"
-            class="${audioACorriger ? "on" : ""}" aria-pressed="${audioACorriger}">⚠ À corriger</button>
-        </details></div>
+        ${blocValidationAudio(leconIndex, idx, cleAudio, audioConforme, audioACorriger)}
       `;
     }
     // Fade in
     setTimeout(() => {
+      if (jeton !== jetonRendu) return;
       main.querySelectorAll(".wg,.wf,.note-card").forEach(el => el.classList.remove("fade"));
     }, 30);
 
@@ -88,6 +86,38 @@ function show(idx) {
     if (typeof mettreAJourAccueil === "function") mettreAJourAccueil();
 
   }, 220);
+}
+
+// ══════════════════════════════════════════════════
+// ÉTAT DE L'ENREGISTREMENT AFFICHÉ SOUS LE MOT
+// ══════════════════════════════════════════════════
+function statutAudioHtml(leconIndex, motIndex) {
+  const etat = etatAudio(leconIndex, motIndex);
+  if (etat.etat === "desaligne") {
+    return '<p class="statut-audio est-desaligne"><span aria-hidden="true">⚠</span> Enregistrement à revérifier : l’entrée a changé depuis l’enregistrement.</p>';
+  }
+  if (etat.etat === "disponible") {
+    return '<p class="statut-audio est-disponible"><span aria-hidden="true">🎧</span> Enregistrement disponible.</p>';
+  }
+  return '<p class="statut-audio est-absent"><span aria-hidden="true">🎙</span> Enregistrement à venir : seule la traduction française est lue.</p>';
+}
+
+function blocValidationAudio(leconIndex, motIndex, cleAudio, audioConforme, audioACorriger) {
+  const etat = etatAudio(leconIndex, motIndex);
+  if (etat.etat !== "disponible") {
+    return '<div class="audio-validation"><details><summary>Vérifier l’enregistrement</summary>' +
+      '<div class="audio-validation-label">Aucun enregistrement pour cette entrée : la vérification sera possible dès que le fichier sera ajouté.</div>' +
+      '</details></div>';
+  }
+  return '<div class="audio-validation"><details>' +
+    '<summary>Vérifier l’enregistrement</summary>' +
+    '<div class="audio-validation-label">Après écoute, indique si l’enregistrement correspond à cette entrée.</div>' +
+    '<div class="audio-validation-fichier">' + echapperHtml(etat.fichier) + '</div>' +
+    '<button type="button" data-validation="conforme" onclick="marquerValidationAudio(\'conforme\')"' +
+    ' class="' + (audioConforme ? "on" : "") + '" aria-pressed="' + audioConforme + '">✓ Correspond</button>' +
+    '<button type="button" data-validation="corriger" onclick="marquerValidationAudio(\'corriger\')"' +
+    ' class="' + (audioACorriger ? "on" : "") + '" aria-pressed="' + audioACorriger + '">⚠ À corriger</button>' +
+    '</details></div>';
 }
 
 // ══════════════════════════════════════════════════
@@ -139,49 +169,23 @@ function sched() {
 function toggleAuto() {
   autoPlay = !autoPlay;
   const b = document.getElementById("b-auto");
-  if (b && autoPlay) {
-    b.textContent = "⏸ Pause";
-    b.classList.add("on");
-    b.setAttribute("aria-pressed", "true");
-    clearTimeout(tmr);
-    stopBar();
-    speechRun++;
-    stopAudio();
-    if (VOIX_OK) window.speechSynthesis.cancel();
-    clearTimeout(lectureDifferee);
+  if (b) {
+    b.textContent = autoPlay ? "⏸ Pause" : "▶ Auto";
+    b.classList.toggle("on", autoPlay);
+    b.setAttribute("aria-pressed", String(autoPlay));
+  }
+  clearTimeout(tmr);
+  clearTimeout(lectureDifferee);
+  lectureDifferee = null;
+  stopBar();
+  speechRun++;
+  stopAudio();
+  if (VOIX_OK) window.speechSynthesis.cancel();
+  if (autoPlay) {
     lectureDifferee = setTimeout(() => {
       lectureDifferee = null;
       speak(() => { if (autoPlay) sched(); });
     }, 350);
-  } else if (b) {
-    b.textContent = "▶ Auto";
-    b.classList.remove("on");
-    b.setAttribute("aria-pressed", "false");
-    clearTimeout(tmr);
-    clearTimeout(lectureDifferee);
-    lectureDifferee = null;
-    stopBar();
-    speechRun++;
-    stopAudio();
-    if (VOIX_OK) window.speechSynthesis.cancel();
-  } else if (autoPlay) {
-    clearTimeout(tmr);
-    stopBar();
-    speechRun++;
-    stopAudio();
-    if (VOIX_OK) window.speechSynthesis.cancel();
-    lectureDifferee = setTimeout(() => {
-      lectureDifferee = null;
-      speak(() => { if (autoPlay) sched(); });
-    }, 350);
-  } else {
-    clearTimeout(tmr);
-    clearTimeout(lectureDifferee);
-    lectureDifferee = null;
-    stopBar();
-    speechRun++;
-    stopAudio();
-    if (VOIX_OK) window.speechSynthesis.cancel();
   }
 }
 

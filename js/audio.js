@@ -66,9 +66,14 @@ function etatAudio(leconIndex, motIndex) {
 function proportionAudioLecon(leconIndex) {
   const lecon = LECONS[leconIndex];
   if (!lecon || !Array.isArray(lecon.mots)) return { disponibles: 0, total: 0 };
-  const entrees = lecon.mots.filter(mot => mot.g);
-  const disponibles = entrees.filter((mot, index) => etatAudio(leconIndex, lecon.mots.indexOf(mot)).etat === "disponible").length;
-  return { disponibles, total: entrees.length };
+  let total = 0;
+  let disponibles = 0;
+  for (let index = 0; index < lecon.mots.length; index++) {
+    if (!lecon.mots[index].g) continue;
+    total++;
+    if (etatAudio(leconIndex, index).etat === "disponible") disponibles++;
+  }
+  return { disponibles, total };
 }
 
 // ══════════════════════════════════════════════════
