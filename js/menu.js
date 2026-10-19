@@ -347,22 +347,23 @@ function ouvrirAide() {
     '<button type="button" class="menu-card" onclick="closeMenu();document.getElementById(\'global-search\').focus()"><span class="menu-card-icon" aria-hidden="true">⌕</span><span><span class="menu-card-title">Rechercher un mot</span><span class="menu-card-description">Écris en Guidar ou en français dans la barre de recherche.</span></span></button>' +
     '<button type="button" class="menu-card" onclick="afficherBibliotheque()"><span class="menu-card-icon" aria-hidden="true">▤</span><span><span class="menu-card-title">Ouvrir les ressources</span><span class="menu-card-description">Parcourir les mots par thème.</span></span></button>' +
     '<div class="module-note">Les prononciations provisoires sont signalées. Les contenus en attente de validation ne remplacent pas l’avis d’un spécialiste.</div>' +
-    '<button type="button" class="resource-back" onclick="closeMenu()">Fermer le guide</button>');
+    '<button type="button" class="resource-back" onclick="closeMenu()">Fermer le guide</button>', "aide");
 }
 function afficherNotifications() {
   openMenu();
   afficherMenu("Notifications",
     '<div class="module-note"><strong>Tu es à jour.</strong><br>Aucune nouvelle notification pour le moment. Les contenus à valider sont indiqués directement dans les leçons.</div>' +
-    '<button type="button" class="resource-back" onclick="closeMenu()">Fermer</button>');
+    '<button type="button" class="resource-back" onclick="closeMenu()">Fermer</button>', "notifications");
 }
 function ouvrirAlphabet() {
-  if (document.getElementById("menu").style.display !== "flex") openMenu();
+  if (!menuOuvert) openMenu();
   const exemples = ["ə", "Ə", "ɗ", "ɓ", "ŋ", "Ŋ", "ɔ", "ǫ", "Ǫ", "ɛ", "ɨ", "ã", "ƴ"];
   const boutons = exemples.map(caractere => '<button type="button" onclick="kopy(\'' + caractere + '\')" aria-label="Copier ' + caractere + '">' + caractere + '</button>').join("");
   afficherMenu("Alphabet et syllabes", '<div class="module-note"><strong>Première étape pour apprendre le Guidar.</strong><br>Les lettres affichées sont des caractères rencontrés dans les contenus déjà fournis, pas encore un alphabet complet validé.</div>' +
     '<h2 class="menu-section-title">Caractères à étudier</h2><div class="alphabet-samples">' + boutons + '</div>' +
+    '<div class="module-note">Clique sur un caractère : il est inséré dans le champ de recherche s’il est actif, sinon copié. Pour saisir un mot en Guidar, ouvre d’abord la recherche puis le clavier Guidar.</div>' +
     '<div class="module-note"><strong>Parcours à compléter avec le spécialiste :</strong><br>ordre de l’alphabet · nom et son des lettres · voyelles et consonnes · syllabes simples puis combinées · exemples et enregistrements. Aucun son non confirmé n’est enseigné ici.</div>' +
-    '<p class="content-status">Fondations en préparation et à valider</p><br><br><button type="button" class="resource-back" onclick="openMenu()">← Retour au menu</button>');
+    '<p class="content-status">Fondations en préparation et à valider</p><br><br><button type="button" class="resource-back" onclick="openMenu()">← Retour au menu</button>', "alphabet");
 }
 function afficherBibliotheque(filtre = "", categorieChoisie = -1) {
   if (document.getElementById("menu").style.display !== "flex") openMenu();
