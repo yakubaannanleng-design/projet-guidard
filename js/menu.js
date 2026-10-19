@@ -61,7 +61,7 @@ function masquerResultatsRecherche() {
 }
 function rechercherApplication(requete) {
   const resultats = document.getElementById("search-results");
-  const recherche = requete.trim().toLocaleLowerCase("fr");
+  const recherche = normaliserTexte(requete.trim());
   if (recherche.length < 2) {
     masquerResultatsRecherche();
     return;
@@ -69,11 +69,11 @@ function rechercherApplication(requete) {
   const correspondances = LECONS.flatMap((lecon, leconIndex) =>
     lecon.mots.map((mot, motIndex) => ({ lecon, leconIndex, mot, motIndex }))
       .filter(({ mot }) => mot.g && mot.f &&
-        (mot.g.toLocaleLowerCase("fr").includes(recherche) || mot.f.toLocaleLowerCase("fr").includes(recherche)))
+        (normaliserTexte(mot.g).includes(recherche) || normaliserTexte(mot.f).includes(recherche)))
   ).slice(0, 8);
   resultats.innerHTML = correspondances.length
     ? correspondances.map(({ lecon, leconIndex, mot, motIndex }) =>
-      '<button type="button" class="search-result" role="option" onclick="ouvrirEntree(' + leconIndex + ',' + motIndex + ')"><strong>' +
+      '<button type="button" class="search-result" onclick="ouvrirEntree(' + leconIndex + ',' + motIndex + ')"><strong>' +
       echapperHtml(mot.g) + '</strong><span>' + echapperHtml(mot.f) + ' · ' + echapperHtml(lecon.titre) + '</span></button>'
     ).join("")
     : '<div class="search-empty" role="status">Aucun résultat. Essaie un autre mot.</div>';
@@ -103,7 +103,7 @@ function ouvrirEntree(leconIndex, motIndex) {
     console.error("Entrée de recherche invalide.", { leconIndex, motIndex });
     return;
   }
-  if (document.getElementById("menu").style.display === "flex") closeMenu();
+  if (menuOuvert) closeMenu();
   clearTimeout(tmr);
   clearTimeout(lectureDifferee);
   lectureDifferee = null;
