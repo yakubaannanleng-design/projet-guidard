@@ -657,6 +657,7 @@ body.theme-dark .statut-audio.est-desaligne{background:rgba(224,110,104,.14);col
   border-color:var(--accent);background:var(--accent-soft);color:var(--accent-strong);
   transform:translateY(-1px);
 }
+.word-navigation button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
 .entry-validation{
   max-width:520px;margin:4px 0 0;padding:8px 14px;border-radius:12px;
   background:var(--or-doux);color:var(--or);
@@ -684,6 +685,7 @@ body.theme-dark .statut-audio.est-desaligne{background:rgba(224,110,104,.14);col
 .audio-validation button.on{
   border-color:var(--accent);background:var(--accent-soft);color:var(--accent-strong);
 }
+.audio-validation button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
 
 /* ── 7. BARRE D'OUTILS DE SECTION ─────────────────────────────────── */
 .section-toolbar{
@@ -850,6 +852,7 @@ body.theme-dark .statut-audio.est-desaligne{background:rgba(224,110,104,.14);col
   color:var(--accent-strong);cursor:pointer;
 }
 .resource-play:hover{background:var(--accent-soft);border-color:var(--accent);}
+.resource-play:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
 .resource-play svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 .resource-translation{margin-top:6px;color:var(--text);font-size:14px;line-height:1.5;}
 .resource-meta{margin-top:7px;color:var(--text-muted);font-size:11px;line-height:1.5;}
