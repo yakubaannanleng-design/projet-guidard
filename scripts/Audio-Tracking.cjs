@@ -90,6 +90,7 @@ for (const element of fichiersParLecon.values()) {
 
 // ── Construction de l'état, entrée par entrée ──
 const anomalies = [];
+const notes = [];
 const etatLecons = {};
 const lignesEtat = [];
 const lignesAFaire = [];
@@ -160,7 +161,8 @@ for (let indexLecon = 0; indexLecon < lessons.length; indexLecon++) {
   etatLecons[numeroLecon] = manifeste;
   const dossierPresent = fs.existsSync(path.join(projectRoot, dossier));
   if (!dossierPresent && position > 0) {
-    anomalies.push(`Leçon ${numeroLecon} : le dossier ${dossier} est absent.`);
+    notes.push(`Leçon ${numeroLecon} : le dossier ${dossier} sera créé pour accueillir les enregistrements.`);
+    if (!checkOnly) fs.mkdirSync(path.join(projectRoot, dossier), { recursive: true });
   }
 }
 
@@ -223,4 +225,9 @@ if (anomalies.length) {
   if (checkOnly) process.exitCode = 1;
 } else {
   console.log("\nAucune anomalie de correspondance entre les données et les fichiers audio.");
+}
+if (notes.length) {
+  console.log("\nREMARQUES");
+  console.log("─────────────────────");
+  notes.forEach(note => console.log("  · " + note));
 }
