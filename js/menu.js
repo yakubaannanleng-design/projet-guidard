@@ -433,6 +433,15 @@ function ouvrirLeconsMenu() {
   }).join("");
   afficherMenu("Choisir une leçon", '<p class="menu-subtitle">Parcours les leçons et reprends où tu veux.</p>' + lecons + '<button type="button" class="resource-back" onclick="openMenu()">← Menu principal</button>', "lecons");
 }
+function appliquerInert(fondInactif) {
+  document.querySelectorAll(".hdr,.search-area,.welcome-card,.home-dashboard,#main,.bbar,#keyboard").forEach(bloc => {
+    if (bloc.hasAttribute("inert")) {
+      if (!fondInactif) bloc.removeAttribute("inert");
+      return;
+    }
+    if (fondInactif) bloc.setAttribute("inert", "");
+  });
+}
 function openMenu() {
   if (!menuOuvert) focusAvantMenu = document.activeElement;
   masquerResultatsRecherche();
@@ -448,7 +457,7 @@ function openMenu() {
     rubrique("Apprendre", item("📘", "Leçons", "Choisir une leçon et suivre son avancement", "ouvrirLeconsMenu()") + item("📚", "Bibliothèque", "Rechercher et écouter les entrées", "afficherBibliotheque()") + item("✓", "Quiz", "Réviser les mots des leçons", "ouvrirQuiz()") + item("🔠", "Alphabet et syllabes", "Parcourir les bases de l’écriture", "ouvrirAlphabet()")) +
     rubrique("Outils", item("▶", "Lecture automatique", "Écouter et faire défiler les entrées", "basculerLectureAutomatique()") + item("⌨️", "Clavier Guidar", "Accéder aux caractères spéciaux", "ouvrirClavierDepuisMenu()") + item("⚙️", "Paramètres", "Affichage, accessibilité et lecture", "ouvrirParametres()")) +
     rubrique("Espace personnel", item("👤", "Compte", "Profil et fonctions à venir", "naviguerEcranFenetre('compte')"));
-  const menu = document.getElementById("menu"); menu.style.display = "flex"; menu.setAttribute("aria-hidden", "false"); menuOuvert = true; menu.querySelector(".menu-close").focus();
+  const menu = document.getElementById("menu"); menu.style.display = "flex"; menu.setAttribute("aria-hidden", "false"); menuOuvert = true; appliquerInert(true); menu.querySelector(".menu-close").focus();
 }
 function basculerLectureAutomatique() {
   closeMenu();
@@ -478,6 +487,7 @@ function closeMenu() {
   menu.style.display = "none";
   menu.setAttribute("aria-hidden", "true");
   menuOuvert = false;
+  appliquerInert(false);
   if (cibleFocus && cibleFocus.focus) cibleFocus.focus();
 }
 

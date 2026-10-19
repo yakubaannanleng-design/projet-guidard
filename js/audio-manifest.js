@@ -1,8 +1,8 @@
 /* Généré par scripts\Audio-Tracking.cjs — ne pas modifier à la main. */
-/* 2026-10-19T22:29:44.311Z */
+/* 2026-10-19T22:50:41.483Z */
 const AUDIO_MANIFEST = {
   "version": 1,
-  "generatedAt": "2026-10-19T22:29:44.311Z",
+  "generatedAt": "2026-10-19T22:50:41.483Z",
   "lessons": {
     "1": {
       "1": {

@@ -88,6 +88,20 @@ for (const element of fichiersParLecon.values()) {
   parLeconEtNumero.get(cle).push(element);
 }
 
+// ── Manifeste précédent (sert à repérer les entrées modifiées depuis l'enregistrement) ──
+let manifestePrecedent = { lessons: {} };
+if (fs.existsSync(manifestPath)) {
+  try {
+    const contexteManifeste = {};
+    vm.runInNewContext(`${fs.readFileSync(manifestPath, "utf8")}\nglobalThis.MANIFESTE_EXPORT = AUDIO_MANIFEST;`, contexteManifeste, { filename: manifestPath });
+    if (contexteManifeste.MANIFESTE_EXPORT && contexteManifeste.MANIFESTE_EXPORT.lessons) {
+      manifestePrecedent = contexteManifeste.MANIFESTE_EXPORT;
+    }
+  } catch (error) {
+    console.warn("Manifeste précédent illisible, il sera reconstruit :", error.message);
+  }
+}
+
 // ── Construction de l'état, entrée par entrée ──
 const anomalies = [];
 const notes = [];
@@ -129,8 +143,17 @@ for (let indexLecon = 0; indexLecon < lessons.length; indexLecon++) {
       remarque = retenu.anomalie;
       anomalies.push(`${identifiant} : ${retenu.anomalie}.`);
     } else {
-      statut = "Enregistré";
-      manifeste[position] = { f: retenu.nom.split("/")[1], h: empreinteEntree };
+      const empreintePrecedente = manifestePrecedent.lessons[numeroLecon] && manifestePrecedent.lessons[numeroLecon][position]
+        ? manifestePrecedent.lessons[numeroLecon][position].h
+        : null;
+      if (empreintePrecedente && empreintePrecedente !== empreinteEntree) {
+        statut = "À ré-enregistrer";
+        remarque = `Le contenu de l’entrée a changé depuis l’enregistrement : ${retenu.nom} doit être refait.`;
+        anomalies.push(`${identifiant} : le contenu a changé depuis l’enregistrement (${retenu.nom}). L’enregistrement est écarté tant qu’il n’est pas refait.`);
+      } else {
+        statut = "Enregistré";
+        manifeste[position] = { f: retenu.nom.split("/")[1], h: empreinteEntree };
+      }
     }
 
     const ligne = [
