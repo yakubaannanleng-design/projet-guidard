@@ -85,6 +85,7 @@ function show(idx) {
     const barre = document.getElementById("prog");
     barre.style.width = pourcentage + "%";
     barre.setAttribute("aria-valuenow", pourcentage);
+    if (typeof mettreAJourAccueil === "function") mettreAJourAccueil();
 
   }, 220);
 }

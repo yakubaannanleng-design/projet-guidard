@@ -55,6 +55,19 @@
     <button class="start-button" type="button" onclick="commencerApprentissage()">Commencer à apprendre <span aria-hidden="true">→</span></button>
   </section>
 
+  <section class="home-dashboard" aria-label="Reprendre l’apprentissage">
+    <div class="dashboard-heading">
+      <div><span class="dashboard-eyebrow">TON PARCOURS</span><h2>Reprendre l’apprentissage</h2></div>
+      <span class="dashboard-count" id="home-progress-count">0 entrée consultée</span>
+    </div>
+    <div class="dashboard-progress" role="progressbar" aria-label="Progression dans les leçons" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="home-progress-bar"><span id="home-progress-fill"></span></div>
+    <p class="dashboard-current" id="home-current-lesson">Leçon en cours</p>
+    <div class="dashboard-actions">
+      <button class="dashboard-primary" type="button" onclick="commencerApprentissage()">Continuer <span aria-hidden="true">→</span></button>
+      <button class="dashboard-secondary" type="button" onclick="naviguerEcranFenetre('quiz')">Réviser avec un quiz</button>
+    </div>
+  </section>
+
   <!-- CONTENU PRINCIPAL -->
   <div class="main" id="main" tabindex="-1" role="region" aria-label="Mot et traduction" aria-live="polite" aria-atomic="true">
   <!-- Contenu injecté par JS -->
@@ -75,7 +88,7 @@
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4z"/><path d="M17 9a5 5 0 0 1 0 6M19 6a9 9 0 0 1 0 12"/></svg>
   </button>
   <button class="nav-item" type="button" data-window-section="ressources" onclick="naviguerEcranFenetre('ressources')">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 4.5v14A2.5 2.5 0 0 1 6.5 16H20M8 6h8M8 9h8"/></svg><span>Ressources</span>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 4.5v14A2.5 2.5 0 0 1 6.5 16H20M8 6h8M8 9h8"/></svg><span>Bibliothèque</span>
   </button>
   <button class="nav-item" type="button" data-window-section="quiz" onclick="naviguerEcranFenetre('quiz')">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3"/><path d="M9 3h6v4H9zM7 12l2 2 4-4M15 13h2M7 18h10"/></svg><span>Quiz</span>

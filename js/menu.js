@@ -32,7 +32,7 @@ const SECTIONS_FENETRE = {
   accueil: "Accueil",
   lecons: "Leçons",
   lecteur: "Lecteur Guidar",
-  ressources: "Ressources",
+  ressources: "Bibliothèque",
   quiz: "Quiz",
   compte: "Compte"
 };
@@ -116,6 +116,23 @@ function commencerApprentissage() {
   document.getElementById("main").focus({ preventScroll: true });
   speak();
 }
+function mettreAJourAccueil() {
+  const nombreTotal = LECONS.reduce((total, lecon) => total + lecon.mots.filter(mot => mot.g).length, 0);
+  const nombreVu = LECONS.reduce((total, lecon, index) => {
+    const limite = Math.min(vus[index] || 0, lecon.mots.length);
+    return total + lecon.mots.reduce((compte, mot, motIndex) => compte + (mot.g && motIndex < limite ? 1 : 0), 0);
+  }, 0);
+  const pourcentage = nombreTotal ? Math.round(nombreVu / nombreTotal * 100) : 0;
+  const compte = document.getElementById("home-progress-count");
+  const barre = document.getElementById("home-progress-bar");
+  const remplissage = document.getElementById("home-progress-fill");
+  const lecon = document.getElementById("home-current-lesson");
+  if (!compte || !barre || !remplissage || !lecon) return;
+  compte.textContent = nombreVu + " / " + nombreTotal + " entrées consultées";
+  barre.setAttribute("aria-valuenow", pourcentage);
+  remplissage.style.width = pourcentage + "%";
+  lecon.textContent = "Leçon en cours · " + LECONS[curL].titre;
+}
 function actionBoutonEcouter() {
   if (ecranFenetre === "lecteur") {
     speak();
@@ -146,6 +163,7 @@ function naviguerEcranFenetre(section) {
       (section === "lecons" ? '<button type="button" class="section-action-button" onclick="openMenu()">Choisir une leçon</button>' : "") +
       (section === "lecteur" ? '<button type="button" class="section-action-button" onclick="openMenu()">Choisir une leçon</button><button type="button" class="section-action-button" onclick="speak()">🔊 Écouter</button>' : "");
   document.getElementById("section-toolbar").hidden = section === "accueil";
+  mettreAJourAccueil();
   if (document.getElementById("menu").style.display === "flex") closeMenu();
   if (section === "ressources") {
     openMenu();
@@ -155,7 +173,11 @@ function naviguerEcranFenetre(section) {
     ouvrirQuiz();
   } else if (section === "compte") {
     openMenu();
-    afficherMenu("Compte", '<div class="module-note"><strong>L’espace compte sera disponible dans une prochaine version.</strong><br>Pour le moment, la progression et les préférences restent enregistrées sur cet appareil, sans compte ni connexion.</div>');
+    afficherMenu("Compte", '<div class="account-preview"><div class="account-avatar" aria-hidden="true">👤</div><h2>Espace compte</h2><p>Les fonctions de compte arrivent dans une prochaine version.</p></div>' +
+      '<div class="account-features"><div class="account-feature"><span aria-hidden="true">👤</span><div><strong>Profil</strong><small>Gérer les informations du compte</small></div><b>À venir</b></div>' +
+      '<div class="account-feature"><span aria-hidden="true">☁️</span><div><strong>Synchronisation</strong><small>Retrouver ta progression sur tes appareils</small></div><b>À venir</b></div>' +
+      '<div class="account-feature"><span aria-hidden="true">💾</span><div><strong>Sauvegarde</strong><small>Conserver et restaurer tes données d’apprentissage</small></div><b>À venir</b></div></div>' +
+      '<div class="module-note">En attendant, la progression et les préférences restent enregistrées sur cet appareil.</div>');
   }
 }
 function initialiserSectionFenetre() {
@@ -177,7 +199,7 @@ function retourAccueil() {
   toast("Tu es sur ton espace d’apprentissage.");
 }
 function afficherCompte() {
-  toast("L’espace compte sera disponible dans une prochaine version.");
+  naviguerEcranFenetre("compte");
 }
 function melangerTableau(elements) {
   const resultat = elements.slice();
@@ -352,13 +374,17 @@ function afficherBibliotheque(filtre = "", categorieChoisie = -1) {
 }
 function ouvrirParametres() {
   if (document.getElementById("menu").style.display !== "flex") openMenu();
-  const coche = (nom, titre, description, active) => '<label class="setting-row"><span><strong>' + titre + '</strong><br><small>' + description + '</small></span><input type="checkbox" aria-label="' + titre + '" ' + (active ? 'checked' : '') + ' onchange="preferences.' + nom + '=this.checked;sauvegarderPreferences()"></label>';
-  afficherMenu("Paramètres et accessibilité", '<div class="module-note">Réglages enregistrés uniquement sur cet appareil.</div><div class="settings-list">' +
-    '<div class="setting-row"><span><strong>Thème</strong><br><small>Choisis une apparence claire ou sombre.</small></span><div class="theme-choice"><button type="button" aria-pressed="' + (preferences.theme === "light") + '" onclick="preferences.theme=\'light\';sauvegarderPreferences();ouvrirParametres()">Clair</button><button type="button" aria-pressed="' + (preferences.theme === "dark") + '" onclick="preferences.theme=\'dark\';sauvegarderPreferences();ouvrirParametres()">Sombre</button></div></div>' +
-    '<label class="setting-row"><span><strong>Taille du texte</strong><br><small>Ajuster les mots, les traductions et les textes de l’application.</small></span><input type="range" min="0.85" max="1.2" step="0.05" value="' + preferences.tailleTexte + '" aria-label="Taille du texte" oninput="preferences.tailleTexte=Number(this.value);document.getElementById(\'taille-texte-affichee\').textContent=Math.round(preferences.tailleTexte*100)+\'%\';sauvegarderPreferences()"><span id="taille-texte-affichee" class="setting-value">' + Math.round(preferences.tailleTexte * 100) + '%</span></label>' +
-    coche("texteGrand", "Texte agrandi", "Agrandir les mots et les traductions.", preferences.texteGrand) + coche("contraste", "Contraste renforcé", "Fond noir et texte plus contrasté.", preferences.contraste) + coche("masquerPhon", "Masquer les aides provisoires", "N’afficher que les prononciations confirmées.", preferences.masquerPhon) +
-    '<label class="setting-row"><span><strong>Vitesse de lecture</strong><br><small>Ralentir ou accélérer la voix de synthèse.</small></span><input type="range" min="0.75" max="1.25" step="0.05" value="' + preferences.vitesse + '" aria-label="Vitesse de lecture" oninput="preferences.vitesse=Number(this.value);document.getElementById(\'vitesse-affichee\').textContent=Math.round(preferences.vitesse*100)+\'%\';sauvegarderPreferences()"><span id="vitesse-affichee" class="setting-value">' + Math.round(preferences.vitesse * 100) + '%</span></label></div>' +
-    '<p class="module-note">La synthèse vocale française de l’appareil sert d’aide et ne remplace pas un enregistrement Guidar validé.</p><button type="button" class="resource-back" onclick="reinitialiserPreferences()">Rétablir les réglages par défaut</button><br><button type="button" class="resource-back" onclick="openMenu()">← Retour au menu</button>');
+  const switcher = (nom, titre, description, active, symbole) => '<label class="settings-row"><span class="settings-icon" aria-hidden="true">' + symbole + '</span><span class="settings-copy"><strong>' + titre + '</strong><small>' + description + '</small></span><input type="checkbox" aria-label="' + titre + '" ' + (active ? 'checked' : '') + ' onchange="preferences.' + nom + '=this.checked;sauvegarderPreferences()"></label>';
+  const groupe = (titre, contenu) => '<section class="settings-group"><h2>' + titre + '</h2><div class="settings-card">' + contenu + '</div></section>';
+  const theme = '<div class="settings-row"><span class="settings-icon" aria-hidden="true">◐</span><span class="settings-copy"><strong>Thème</strong><small>Choisis une apparence claire ou sombre.</small></span><div class="theme-choice"><button type="button" aria-pressed="' + (preferences.theme === "light") + '" onclick="preferences.theme=\'light\';sauvegarderPreferences();ouvrirParametres()">Clair</button><button type="button" aria-pressed="' + (preferences.theme === "dark") + '" onclick="preferences.theme=\'dark\';sauvegarderPreferences();ouvrirParametres()">Sombre</button></div></div>';
+  const taille = '<label class="settings-row"><span class="settings-icon" aria-hidden="true">A</span><span class="settings-copy"><strong>Taille du texte</strong><small>Ajuste la lecture des mots et des traductions.</small></span><input type="range" min="0.85" max="1.2" step="0.05" value="' + preferences.tailleTexte + '" aria-label="Taille du texte" oninput="preferences.tailleTexte=Number(this.value);document.getElementById(\'taille-texte-affichee\').textContent=Math.round(preferences.tailleTexte*100)+\'%\';sauvegarderPreferences()"><span id="taille-texte-affichee" class="setting-value">' + Math.round(preferences.tailleTexte * 100) + '%</span></label>';
+  const vitesse = '<label class="settings-row"><span class="settings-icon" aria-hidden="true">♫</span><span class="settings-copy"><strong>Vitesse de lecture</strong><small>Règle la vitesse de la voix de synthèse.</small></span><input type="range" min="0.75" max="1.25" step="0.05" value="' + preferences.vitesse + '" aria-label="Vitesse de lecture" oninput="preferences.vitesse=Number(this.value);document.getElementById(\'vitesse-affichee\').textContent=Math.round(preferences.vitesse*100)+\'%\';sauvegarderPreferences()"><span id="vitesse-affichee" class="setting-value">' + Math.round(preferences.vitesse * 100) + '%</span></label>';
+  const contenu = '<div class="settings-intro">Personnalise ton expérience. Ces réglages restent enregistrés sur cet appareil.</div>' +
+    groupe("Affichage", theme + taille) +
+    groupe("Accessibilité", switcher("texteGrand", "Texte agrandi", "Agrandir les mots et leur traduction.", preferences.texteGrand, "↕") + switcher("contraste", "Contraste renforcé", "Améliorer la lisibilité des éléments.", preferences.contraste, "◑")) +
+    groupe("Apprentissage", vitesse + switcher("masquerPhon", "Masquer les aides provisoires", "Afficher uniquement les prononciations confirmées.", preferences.masquerPhon, "◉")) +
+    '<p class="settings-note">La voix française de synthèse est une aide ; elle ne remplace pas un enregistrement Guidar validé.</p><button type="button" class="resource-back" onclick="reinitialiserPreferences()">Rétablir les réglages par défaut</button><button type="button" class="resource-back" onclick="openMenu()">← Retour au menu</button>';
+  afficherMenu("Paramètres", contenu);
 }
 function ouvrirClavierDepuisMenu() { closeMenu(); if (!kbOn) toggleKb(); }
 function openMenu() {
