@@ -213,6 +213,33 @@ if (contexteRendu._erreurs.length) {
   console.log("  ÉCHEC erreurs asynchrones pendant le rendu : " + contexteRendu._erreurs.map(e => e.message).join(" | "));
 }
 
+// 4. CHARTE VISUELLE ET COHÉRENCE HTML/JS
+// ══════════════════════════════════════════════════
+console.log("\nCHARTE VISUELLE");
+const css = lire("css/style.css");
+const html = lire("guidar-final.html");
+const sourcesJs = ["js/init.js", "js/menu.js", "js/player.js", "js/keyboard.js", "js/interactions.js", "js/audio.js"]
+  .map(f => lire(f)).join("\n");
+
+verifier("l’en-tête affiche le badge « Guidar »", /class="hdr-badge"[^>]*>Guidar</.test(html));
+verifier("l’ancien compteur de leçon a disparu de la page", !html.includes("hdr-lecon"));
+verifier("aucun script ne référence l’ancien compteur de leçon", !sourcesJs.includes("hdr-lecon"));
+verifier("le bloc éditorial de la carte est présent", css.includes(".card-head{"));
+verifier("la charte définit le fond papier chaud", css.includes("--app-bg:#f6f3ec"));
+verifier("la charte définit l’accent vert profond", css.includes("--accent:#14624a"));
+verifier("le thème sombre est toujours disponible", css.includes("body.theme-dark{"));
+verifier("le contraste renforcé est toujours disponible", css.includes("body.contraste-renforce{"));
+verifier("la barre basse est flottante", /\.bbar\{[^}]*position:fixed/.test(css));
+verifier("le liseré or remplace l’étiquette « À DÉCOUVRIR »", !css.includes("À DÉCOUVRIR"));
+verifier("le halo de la scène est un dégradé radial", /\.main::before\{[^}]*radial-gradient/.test(css));
+
+essayer("l’en-tête éditorial de la carte est rendu", () => {
+  contexteRendu.show(1);
+  const rendu = element("main").innerHTML;
+  verifier("la carte indique la leçon", rendu.includes("card-lesson"));
+  verifier("la carte indique la position dans la leçon", /card-count">\s*2\s*\/\s*\d+/.test(rendu), rendu.slice(0, 400));
+});
+
 console.log("\n" + reussis + " contrôle(s) réussi(s), " + echecs + " échec(s).");
 console.log(`Couverture audio : ${couverts}/${totalEntrees} entrées (${totalEntrees ? Math.round(couverts / totalEntrees * 100) : 0} %).`);
 if (echecs) process.exitCode = 1;
