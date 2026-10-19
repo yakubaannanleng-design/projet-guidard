@@ -20,7 +20,7 @@ document.addEventListener("touchstart", e => {
     !e.target.closest("button,input,select,textarea,summary,a");
 }, {passive:true});
 document.addEventListener("touchend", e => {
-  if (!swipeAllowed || document.getElementById("menu").style.display === "flex") return;
+  if (!swipeAllowed || menuOuvert) return;
   swipeAllowed = false;
   const dx = e.changedTouches[0].clientX - sx;
   const dy = e.changedTouches[0].clientY - sy;
@@ -36,7 +36,7 @@ document.getElementById("main").addEventListener("pointerdown", event => {
   pointerSwipeAllowed = !event.target.closest("button,input,select,textarea,summary,a");
 });
 document.getElementById("main").addEventListener("pointerup", event => {
-  if (!pointerSwipeAllowed || document.getElementById("menu").style.display === "flex") return;
+  if (!pointerSwipeAllowed || menuOuvert) return;
   pointerSwipeAllowed = false;
   const dx = event.clientX - px;
   const dy = event.clientY - py;
@@ -45,13 +45,13 @@ document.getElementById("main").addEventListener("pointerup", event => {
 
 // CLAVIER PC (éviter conflit avec la touche P)
 document.addEventListener("keydown", e => {
-  const menu = document.getElementById("menu");
-  if (menu.style.display === "flex") {
+  if (menuOuvert) {
     if (e.key === "Escape") closeMenu();
     if (e.key === "Tab") {
-      const boutons = menu.querySelectorAll("button:not([disabled])");
+      const boutons = document.querySelectorAll("#menu button:not([disabled]), #menu input:not([disabled]), #menu select:not([disabled]), #menu summary, #menu a[href]");
       const premier = boutons[0];
       const dernier = boutons[boutons.length - 1];
+      if (!premier || !dernier) return;
       if (e.shiftKey && document.activeElement === premier) {
         e.preventDefault();
         dernier.focus();
@@ -68,11 +68,14 @@ document.addEventListener("keydown", e => {
     if (boutonOptions) boutonOptions.focus();
     return;
   }
-  if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
-  if (e.key === "ArrowRight") go(1);
-  if (e.key === "ArrowLeft")  go(-1);
-  if (e.key === "Enter")      speak();
-  if (e.key === " ") { e.preventDefault(); toggleAuto(); }
+  const cible = e.target;
+  const estChampSaisie = cible.tagName === "INPUT" || cible.tagName === "TEXTAREA" || cible.tagName === "SELECT" || cible.isContentEditable;
+  if (estChampSaisie) return;
+  // Un bouton ou un lien garde son comportement natif (Espace et Entrée) :
+  // on évite de déclencher en plus la lecture ou le défilement automatique.
+  const estCommande = cible.closest && cible.closest("button,a,summary,[role=button]");
+  if (e.key === "ArrowRight") { go(1); return; }
+  if (e.key === "ArrowLeft") { go(-1); return; }
+  if (e.key === "Enter") { if (!estCommande) speak(undefined, true); return; }
+  if (e.key === " ") { if (!estCommande) { e.preventDefault(); toggleAuto(); } return; }
 });
-
-// ══════════════════════════════════════════════════

@@ -39,7 +39,7 @@
       <input id="global-search" type="search" placeholder="Rechercher un mot ou une traduction" autocomplete="off" oninput="rechercherApplication(this.value)" onkeydown="gererClavierRecherche(event)">
       <button class="search-clear" type="button" onclick="effacerRecherche()" aria-label="Effacer la recherche">×</button>
     </label>
-    <div class="search-results" id="search-results" role="listbox" aria-label="Résultats de recherche" hidden></div>
+    <div class="search-results" id="search-results" aria-label="Résultats de recherche" hidden></div>
   </section>
 
   <section class="welcome-card" aria-labelledby="welcome-title">
@@ -145,6 +145,7 @@
 <div id="toast"></div>
 
   <script src="js/data.js"></script>
+  <script src="js/audio-manifest.js"></script>
   <script src="js/menu.js"></script>
   <script src="js/state.js"></script>
   <script src="js/player.js"></script>
