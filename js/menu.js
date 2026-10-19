@@ -267,14 +267,14 @@ function demarrerQuiz(choixLecon = -1) {
   }
   const entrees = obtenirEntreesQuiz(choixLecon);
   if (entrees.length < 4) {
-    afficherMenu("Quiz indisponible", '<div class="module-note">Cette catégorie ne contient pas encore assez de réponses distinctes pour proposer un quiz fiable.</div><button type="button" class="resource-back" onclick="ouvrirQuiz()">Choisir une autre catégorie</button>');
+    afficherMenu("Quiz indisponible", '<div class="module-note">Cette catégorie ne contient pas encore assez de réponses distinctes pour proposer un quiz fiable.</div><button type="button" class="resource-back" onclick="ouvrirQuiz()">Choisir une autre catégorie</button>', "quiz");
     return;
   }
   const questions = melangerTableau(entrees).map(({ mot, leconIndex }) => {
-    const traduction = mot.f.trim().toLocaleLowerCase("fr");
+    const traduction = normaliserTexte(mot.f.trim());
     const distracteurs = melangerTableau(entrees.filter(entree =>
-      entree.mot.g.trim().toLocaleLowerCase("fr") !== mot.g.trim().toLocaleLowerCase("fr") &&
-      entree.mot.f.trim().toLocaleLowerCase("fr") !== traduction
+      normaliserTexte(entree.mot.g.trim()) !== normaliserTexte(mot.g.trim()) &&
+      normaliserTexte(entree.mot.f.trim()) !== traduction
     )).slice(0, 3);
     return distracteurs.length === 3 ? {
       question: mot,
@@ -299,7 +299,7 @@ function afficherQuestionQuiz() {
     const message = score === total ? "Excellent, sans faute !" : score >= Math.ceil(total * 0.7) ? "Bravo, tu progresses bien !" : "Continue à t’entraîner, tu vas y arriver !";
     afficherMenu("Quiz terminé", '<div class="quiz-score"><span class="quiz-score-value">' + score + ' / ' + total + '</span><strong>' + message + '</strong><span>bonnes réponses</span></div>' +
       '<button type="button" class="quiz-primary" onclick="demarrerQuiz(' + quizSession.choixLecon + ')">Recommencer <span aria-hidden="true">↻</span></button>' +
-      '<button type="button" class="resource-back quiz-back" onclick="openMenu()">Retour au menu</button>');
+      '<button type="button" class="resource-back quiz-back" onclick="openMenu()">Retour au menu</button>', "quiz-resultat");
     return;
   }
   const question = quizSession.questions[quizSession.index];
@@ -322,7 +322,7 @@ function afficherQuestionQuiz() {
     Math.round(quizSession.index / quizSession.questions.length * 100) + '%"></span></div>' +
     '<div class="quiz-question-label">Comment dit-on en Guidar ?</div><div class="quiz-question">' +
     echapperHtml(question.question.f) + '</div><div class="quiz-answers">' + boutons + '</div>' + retour +
-    '<div class="quiz-notice">Les réponses utilisent le contenu existant, qui reste à valider par un spécialiste.</div>');
+    '<div class="quiz-notice">Les réponses utilisent le contenu existant, qui reste à valider par un spécialiste.</div>', "quiz");
 }
 function repondreQuiz(index) {
   if (!quizSession || !Number.isInteger(index)) return;
