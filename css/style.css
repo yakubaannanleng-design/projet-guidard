@@ -398,7 +398,7 @@ body.theme-dark{
 }
 .search-area{
   position:relative;z-index:100;flex-shrink:0;width:min(100% - 32px,760px);
-  margin:14px auto 0;
+  margin:14px auto 12px;
 }
 .search-box{
   min-height:48px;display:flex;align-items:center;gap:10px;padding:0 13px;
@@ -415,7 +415,7 @@ body.theme-dark{
 .search-clear{display:none;border:0;background:transparent;color:var(--text-muted);font-size:23px;cursor:pointer;}
 .search-box:focus-within .search-clear{display:block;}
 .search-results{
-  position:absolute;top:calc(100% + 7px);left:0;right:0;max-height:min(55vh,420px);
+  position:relative;max-height:min(38vh,300px);margin-top:7px;
   overflow:auto;padding:7px;border:1px solid var(--line);border-radius:15px;
   background:var(--surface);box-shadow:var(--shadow);
 }
@@ -534,6 +534,17 @@ body.theme-dark{
 .menu-card{border-color:var(--line);background:var(--surface);color:var(--text);}
 .menu-card-title{color:var(--text);}
 .menu-card-description{color:var(--text-muted);}
+.menu-index-intro{margin:2px 2px 14px;color:var(--text-muted);font-size:12px;line-height:1.5;}
+.menu-index-group{overflow:hidden;border:1px solid var(--line);border-radius:15px;background:var(--surface);}
+.menu-index-item{width:100%;min-height:67px;display:flex;align-items:center;gap:12px;padding:10px 13px;border:0;border-bottom:1px solid var(--line);background:var(--surface);color:var(--text);text-align:left;font:inherit;cursor:pointer;}
+.menu-index-item:last-child{border-bottom:0;}
+.menu-index-item:hover,.menu-index-item:focus-visible{background:var(--surface-muted);}
+.menu-index-icon{width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;border-radius:12px;background:var(--accent-soft);font-size:18px;}
+.menu-index-copy{min-width:0;flex:1;display:grid;gap:3px;}
+.menu-index-copy strong{color:var(--text);font-size:13px;font-weight:650;}
+.menu-index-copy small{color:var(--text-muted);font-size:10px;line-height:1.35;}
+.menu-index-arrow{color:var(--text-muted);font-size:24px;font-weight:300;line-height:1;}
+.menu-subtitle{margin:2px 2px 12px;color:var(--text-muted);font-size:12px;line-height:1.5;}
 .content-status{border-color:var(--line);color:var(--accent);}
 .resource-search,.setting-row,.resource-result{
   border-color:var(--line);background:var(--surface);color:var(--text);

@@ -387,27 +387,32 @@ function ouvrirParametres() {
   afficherMenu("Paramètres", contenu);
 }
 function ouvrirClavierDepuisMenu() { closeMenu(); if (!kbOn) toggleKb(); }
+function ouvrirLeconsMenu() {
+  if (document.getElementById("menu").style.display !== "flex") openMenu();
+  const lecons = LECONS.map((lecon, index) => {
+    const nombreVu = Math.min(vus[index] || 0, lecon.mots.length);
+    const terminee = lecon.mots.length > 1 && nombreVu === lecon.mots.length;
+    const audiosValides = lecon.mots.filter((mot, motIndex) => mot.g && validationsAudio[cleValidationAudio(index, motIndex)] === "conforme").length;
+    const nombreAudios = lecon.mots.filter(mot => mot.g).length;
+    const actif = index === curL;
+    return '<button type="button" class="menu-item" onclick="chooseLecon(' + index + ')" ' + (actif ? 'aria-current="page"' : '') + ' style="background:' + (actif ? 'var(--accent-soft)' : 'var(--surface)') + ';border:1px solid ' + (actif ? 'var(--accent)' : 'var(--line)') + '"><span class="mi-ico">' + echapperHtml(lecon.icone || "📘") + '</span><div class="mi-txt"><div class="mi-titre">' + echapperHtml(lecon.titre) + '</div><div class="mi-count">' + nombreVu + ' / ' + lecon.mots.length + ' entrée(s) vues' + (terminee ? ' — Leçon terminée ✓' : '') + '</div><div class="mi-count">' + audiosValides + ' / ' + nombreAudios + ' audio(s) confirmé(s)</div></div>' + (actif ? '<span class="mi-check">✓</span>' : '<span class="menu-index-arrow" aria-hidden="true">›</span>') + '</button>';
+  }).join("");
+  afficherMenu("Choisir une leçon", '<p class="menu-subtitle">Parcours les leçons et reprends où tu veux.</p>' + lecons + '<button type="button" class="resource-back" onclick="openMenu()">← Menu principal</button>');
+}
 function openMenu() {
   if (document.getElementById("menu").style.display !== "flex") focusAvantMenu = document.activeElement;
   masquerResultatsRecherche();
   clearTimeout(tmr); clearTimeout(lectureDifferee); lectureDifferee = null;
   if (autoPlay) toggleAuto();
   speechRun++; stopAudio(); if (VOIX_OK) window.speechSynthesis.cancel();
-  document.getElementById("menu-titre").textContent = "Menu d’apprentissage";
   const liste = document.getElementById("menu-liste");
-  const cartes = '<div class="module-note">Sans compte ni connexion : ta progression et tes réglages restent sur cet appareil.</div><h2 class="menu-section-title">Apprendre et consulter</h2>' +
-    '<button type="button" class="menu-card" onclick="ouvrirAlphabet()"><span class="menu-card-icon" aria-hidden="true">🔠</span><span><span class="menu-card-title">Alphabet et syllabes</span><span class="menu-card-description">Première étape pour débutants, enfants et adultes · contenu à valider.</span></span></button>' +
-    '<button type="button" class="menu-card" onclick="afficherBibliotheque()"><span class="menu-card-icon" aria-hidden="true">📚</span><span><span class="menu-card-title">Bibliothèque numérique</span><span class="menu-card-description">Rechercher parmi les mots et traductions déjà intégrés.</span></span></button>' +
-    '<button type="button" class="menu-card" onclick="ouvrirQuiz()"><span class="menu-card-icon" aria-hidden="true">✓</span><span><span class="menu-card-title">Quiz</span><span class="menu-card-description">Vérifier tes connaissances avec les mots des leçons.</span></span></button>' +
-    '<button type="button" class="menu-card" onclick="basculerLectureAutomatique()"><span class="menu-card-icon" aria-hidden="true">▶</span><span><span class="menu-card-title">Lecture automatique</span><span class="menu-card-description">Faire défiler et écouter les entrées automatiquement.</span></span></button>' +
-    '<button type="button" class="menu-card" onclick="ouvrirClavierDepuisMenu()"><span class="menu-card-icon" aria-hidden="true">⌨️</span><span><span class="menu-card-title">Clavier Guidar</span><span class="menu-card-description">Afficher les lettres spéciales et les copier.</span></span></button>' +
-    '<button type="button" class="menu-card" onclick="ouvrirParametres()"><span class="menu-card-icon" aria-hidden="true">⚙️</span><span><span class="menu-card-title">Paramètres et accessibilité</span><span class="menu-card-description">Taille du texte, contraste, aides phonétiques et vitesse de lecture.</span></span></button>' +
-    '<h2 class="menu-section-title">Parcours d’apprentissage</h2>';
-  liste.innerHTML = cartes + LECONS.map((l, i) => {
-    const actif = i === curL, nombreVu = Math.min(vus[i] || 0, l.mots.length), terminee = l.mots.length > 1 && nombreVu === l.mots.length;
-    const audiosValides = l.mots.filter((mot, j) => mot.g && validationsAudio[cleValidationAudio(i, j)] === "conforme").length, nombreAudios = l.mots.filter(mot => mot.g).length;
-    return '<button type="button" class="menu-item" onclick="chooseLecon(' + i + ')" ' + (actif ? 'aria-current="page"' : '') + ' style="background:' + (actif ? 'rgba(200,146,42,.18)' : 'rgba(200,146,42,.04)') + ';border:1px solid ' + (actif ? 'rgba(200,146,42,.45)' : 'rgba(200,146,42,.12)') + '"><span class="mi-ico">' + l.icone + '</span><div class="mi-txt"><div class="mi-titre">' + echapperHtml(l.titre) + '</div><div class="mi-count">' + nombreVu + ' / ' + l.mots.length + ' entrée(s) vues' + (terminee ? ' — Leçon terminée ✓' : '') + '</div><div class="mi-count">' + audiosValides + ' / ' + nombreAudios + ' audio(s) confirmé(s)</div></div>' + (actif ? '<span class="mi-check">✓</span>' : '') + '</button>';
-  }).join("");
+  document.getElementById("menu-titre").textContent = "Plus d’options";
+  const rubrique = (titre, items) => '<h2 class="menu-section-title">' + titre + '</h2><div class="menu-index-group">' + items + '</div>';
+  const item = (icone, titre, description, action) => '<button type="button" class="menu-index-item" onclick="' + action + '"><span class="menu-index-icon" aria-hidden="true">' + icone + '</span><span class="menu-index-copy"><strong>' + titre + '</strong><small>' + description + '</small></span><span class="menu-index-arrow" aria-hidden="true">›</span></button>';
+  liste.innerHTML = '<p class="menu-index-intro">Accès rapide aux rubriques de GuidarApp.</p>' +
+    rubrique("Apprendre", item("📘", "Leçons", "Choisir une leçon et suivre son avancement", "ouvrirLeconsMenu()") + item("📚", "Bibliothèque", "Rechercher et écouter les entrées", "afficherBibliotheque()") + item("✓", "Quiz", "Réviser les mots des leçons", "ouvrirQuiz()") + item("🔠", "Alphabet et syllabes", "Parcourir les bases de l’écriture", "ouvrirAlphabet()")) +
+    rubrique("Outils", item("▶", "Lecture automatique", "Écouter et faire défiler les entrées", "basculerLectureAutomatique()") + item("⌨️", "Clavier Guidar", "Accéder aux caractères spéciaux", "ouvrirClavierDepuisMenu()") + item("⚙️", "Paramètres", "Affichage, accessibilité et lecture", "ouvrirParametres()")) +
+    rubrique("Espace personnel", item("👤", "Compte", "Profil et fonctions à venir", "naviguerEcranFenetre('compte')"));
   const menu = document.getElementById("menu"); menu.style.display = "flex"; menu.setAttribute("aria-hidden", "false"); menu.querySelector(".menu-close").focus();
 }
 function basculerLectureAutomatique() {
@@ -420,7 +425,7 @@ function retourEcranPrecedent() {
     ouvrirQuiz();
     return;
   }
-  if (titre === "Menu d’apprentissage") {
+  if (titre === "Plus d’options") {
     if (ecranFenetre) {
       if (["ressources", "quiz", "compte"].includes(ecranFenetre)) naviguerEcranFenetre("accueil");
       else closeMenu();
