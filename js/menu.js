@@ -434,13 +434,14 @@ function ouvrirLeconsMenu() {
   afficherMenu("Choisir une leçon", '<p class="menu-subtitle">Parcours les leçons et reprends où tu veux.</p>' + lecons + '<button type="button" class="resource-back" onclick="openMenu()">← Menu principal</button>', "lecons");
 }
 function openMenu() {
-  if (document.getElementById("menu").style.display !== "flex") focusAvantMenu = document.activeElement;
+  if (!menuOuvert) focusAvantMenu = document.activeElement;
   masquerResultatsRecherche();
   clearTimeout(tmr); clearTimeout(lectureDifferee); lectureDifferee = null;
   if (autoPlay) toggleAuto();
   speechRun++; stopAudio(); if (VOIX_OK) window.speechSynthesis.cancel();
   const liste = document.getElementById("menu-liste");
   document.getElementById("menu-titre").textContent = "Plus d’options";
+  vueMenu = "menu";
   const rubrique = (titre, items) => '<h2 class="menu-section-title">' + titre + '</h2><div class="menu-index-group">' + items + '</div>';
   const item = (icone, titre, description, action) => '<button type="button" class="menu-index-item" onclick="' + action + '"><span class="menu-index-icon" aria-hidden="true">' + icone + '</span><span class="menu-index-copy"><strong>' + titre + '</strong><small>' + description + '</small></span><span class="menu-index-arrow" aria-hidden="true">›</span></button>';
   liste.innerHTML = '<p class="menu-index-intro">Accès rapide aux rubriques de GuidarApp.</p>' +
