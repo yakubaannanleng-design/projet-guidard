@@ -251,8 +251,8 @@ function obtenirEntreesQuiz(choixLecon) {
   const vuesTraductions = new Set();
   return source.filter(({ mot }) => {
     if (!mot.g || !mot.f) return false;
-    const guidar = mot.g.trim().toLocaleLowerCase("fr");
-    const francais = mot.f.trim().toLocaleLowerCase("fr");
+    const guidar = normaliserTexte(mot.g.trim());
+    const francais = normaliserTexte(mot.f.trim());
     if (vusGuidar.has(guidar) || vuesTraductions.has(francais) || !francais) return false;
     vusGuidar.add(guidar);
     vuesTraductions.add(francais);
