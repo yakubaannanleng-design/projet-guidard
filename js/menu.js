@@ -448,19 +448,18 @@ function openMenu() {
     rubrique("Apprendre", item("📘", "Leçons", "Choisir une leçon et suivre son avancement", "ouvrirLeconsMenu()") + item("📚", "Bibliothèque", "Rechercher et écouter les entrées", "afficherBibliotheque()") + item("✓", "Quiz", "Réviser les mots des leçons", "ouvrirQuiz()") + item("🔠", "Alphabet et syllabes", "Parcourir les bases de l’écriture", "ouvrirAlphabet()")) +
     rubrique("Outils", item("▶", "Lecture automatique", "Écouter et faire défiler les entrées", "basculerLectureAutomatique()") + item("⌨️", "Clavier Guidar", "Accéder aux caractères spéciaux", "ouvrirClavierDepuisMenu()") + item("⚙️", "Paramètres", "Affichage, accessibilité et lecture", "ouvrirParametres()")) +
     rubrique("Espace personnel", item("👤", "Compte", "Profil et fonctions à venir", "naviguerEcranFenetre('compte')"));
-  const menu = document.getElementById("menu"); menu.style.display = "flex"; menu.setAttribute("aria-hidden", "false"); menu.querySelector(".menu-close").focus();
+  const menu = document.getElementById("menu"); menu.style.display = "flex"; menu.setAttribute("aria-hidden", "false"); menuOuvert = true; menu.querySelector(".menu-close").focus();
 }
 function basculerLectureAutomatique() {
   closeMenu();
   toggleAuto();
 }
 function retourEcranPrecedent() {
-  const titre = document.getElementById("menu-titre").textContent;
-  if (quizSession && (titre === "Quiz Guidar" || titre === "Quiz terminé")) {
+  if (vueMenu === "quiz" || vueMenu === "quiz-resultat") {
     ouvrirQuiz();
     return;
   }
-  if (titre === "Plus d’options") {
+  if (vueMenu === "menu") {
     if (ecranFenetre) {
       if (["ressources", "quiz", "compte"].includes(ecranFenetre)) naviguerEcranFenetre("accueil");
       else closeMenu();
@@ -478,6 +477,7 @@ function closeMenu() {
     : ecranFenetre ? document.getElementById("main") : document.querySelector(".nav-item");
   menu.style.display = "none";
   menu.setAttribute("aria-hidden", "true");
+  menuOuvert = false;
   if (cibleFocus && cibleFocus.focus) cibleFocus.focus();
 }
 
