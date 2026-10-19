@@ -9,6 +9,5 @@ if (!LECONS[curL].mots[curM]?.g) {
   if (prochaineEntree >= 0) curM = prochaineEntree;
   else if (premiereEntree >= 0) curM = premiereEntree;
 }
-document.getElementById("hdr-lecon").textContent = LECONS[curL].titre;
 show(curM);
 initialiserSectionFenetre();

@@ -112,7 +112,6 @@ function ouvrirEntree(leconIndex, motIndex) {
   if (VOIX_OK) window.speechSynthesis.cancel();
   curL = leconIndex;
   curM = motIndex;
-  document.getElementById("hdr-lecon").textContent = LECONS[leconIndex].titre;
   masquerResultatsRecherche();
   show(motIndex);
 }
@@ -507,7 +506,6 @@ function chooseLecon(i) {
   curM = premiereEntree >= 0 ? premiereEntree : 0;
   focusAvantMenu = ecranFenetre ? document.getElementById("main") : document.querySelector(".bbar button");
   closeMenu();
-  document.getElementById("hdr-lecon").textContent = LECONS[i].titre;
   show(curM);
 }
 

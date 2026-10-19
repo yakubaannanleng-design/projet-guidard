@@ -44,6 +44,12 @@ function show(idx) {
   vus[leconIndex] = Math.max(vus[leconIndex] || 0, idx + 1);
   sauvegarderProgression();
 
+  const enTeteCarte = `
+    <div class="card-head">
+      <span class="card-lesson">${echapperHtml(LECONS[leconIndex].titre)}</span>
+      <span class="card-count">${idx + 1} / ${mots.length}</span>
+    </div>`;
+
   // Fade out
   main.querySelectorAll(".wg,.wf,.note-card").forEach(el => el.classList.add("fade"));
 
@@ -51,7 +57,7 @@ function show(idx) {
     if (jeton !== jetonRendu) return;
     if (!m.g) {
       // Mot note/titre — pas de texte Guidar
-      main.innerHTML = `<div class="note-card">${echapperHtml(m.f)}</div>${navigationMots}`;
+      main.innerHTML = `${enTeteCarte}<div class="note-card">${echapperHtml(m.f)}</div>${navigationMots}`;
     } else {
       const cleAudio = cleValidationAudio(leconIndex, idx);
       const audioConforme = validationsAudio[cleAudio] === "conforme";
@@ -61,6 +67,7 @@ function show(idx) {
         ? '<p class="entry-validation">Transcription initiale : graphie et traduction à valider par un spécialiste.</p>'
         : "";
       main.innerHTML = `
+        ${enTeteCarte}
         <div class="wg">${echapperHtml(m.g)}</div>
         ${phonetique ? `<div class="prononciation${phonetique.provisoire ? " prononciation-provisoire" : ""}" aria-label="${phonetique.provisoire ? "Aide de prononciation approximative, à valider" : "Aide de prononciation"}">${echapperHtml(phonetique.texte)}</div>` : ""}
         <div class="sep"></div>
