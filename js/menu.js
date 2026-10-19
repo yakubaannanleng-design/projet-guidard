@@ -144,7 +144,7 @@ function mettreAJourAccueil() {
 }
 function actionBoutonEcouter() {
   if (ecranFenetre === "lecteur") {
-    speak();
+    speak(undefined, true);
     return;
   }
   naviguerEcranFenetre("lecteur");
@@ -169,11 +169,11 @@ function naviguerEcranFenetre(section) {
   document.getElementById("section-toolbar").innerHTML = section === "accueil"
     ? ""
     : '<strong>' + SECTIONS_FENETRE[section] + '</strong>' +
-      (section === "lecons" ? '<button type="button" class="section-action-button" onclick="openMenu()">Choisir une leçon</button>' : "") +
-      (section === "lecteur" ? '<button type="button" class="section-action-button" onclick="openMenu()">Choisir une leçon</button><button type="button" class="section-action-button" onclick="speak()">🔊 Écouter</button>' : "");
+      (section === "lecons" ? '<button type="button" class="section-action-button" onclick="ouvrirLeconsMenu()">Choisir une leçon</button>' : "") +
+      (section === "lecteur" ? '<button type="button" class="section-action-button" onclick="ouvrirLeconsMenu()">Choisir une leçon</button><button type="button" class="section-action-button" onclick="speak(undefined, true)">🔊 Écouter</button>' : "");
   document.getElementById("section-toolbar").hidden = section === "accueil";
   mettreAJourAccueil();
-  if (document.getElementById("menu").style.display === "flex") closeMenu();
+  if (menuOuvert) closeMenu();
   if (section === "ressources") {
     openMenu();
     afficherBibliotheque();
@@ -186,7 +186,7 @@ function naviguerEcranFenetre(section) {
       '<div class="account-features"><div class="account-feature"><span aria-hidden="true">👤</span><div><strong>Profil</strong><small>Gérer les informations du compte</small></div><b>À venir</b></div>' +
       '<div class="account-feature"><span aria-hidden="true">☁️</span><div><strong>Synchronisation</strong><small>Retrouver ta progression sur tes appareils</small></div><b>À venir</b></div>' +
       '<div class="account-feature"><span aria-hidden="true">💾</span><div><strong>Sauvegarde</strong><small>Conserver et restaurer tes données d’apprentissage</small></div><b>À venir</b></div></div>' +
-      '<div class="module-note">En attendant, la progression et les préférences restent enregistrées sur cet appareil.</div>');
+      '<div class="module-note">En attendant, la progression et les préférences restent enregistrées sur cet appareil.</div>', "compte");
   }
 }
 function initialiserSectionFenetre() {
@@ -203,7 +203,7 @@ function retourAccueil() {
     return;
   }
   masquerResultatsRecherche();
-  if (document.getElementById("menu").style.display === "flex") closeMenu();
+  if (menuOuvert) closeMenu();
   document.getElementById("main").scrollTop = 0;
   toast("Tu es sur ton espace d’apprentissage.");
 }
@@ -219,7 +219,7 @@ function melangerTableau(elements) {
   return resultat;
 }
 function ouvrirQuiz() {
-  if (document.getElementById("menu").style.display !== "flex") openMenu();
+  if (!menuOuvert) openMenu();
   quizSession = null;
   const toutesEntrees = obtenirEntreesQuiz(-1);
   const nombreToutesQuestions = Math.min(10, toutesEntrees.length);
@@ -241,7 +241,7 @@ function ouvrirQuiz() {
   });
   afficherMenu("Quiz par leçon", '<div class="module-note"><strong>Choisis une catégorie pour jouer.</strong><br>Réponds aux questions en sélectionnant le mot Guidar qui correspond à sa traduction française.</div>' +
     '<h2 class="menu-section-title">Catégories de quiz</h2><div class="quiz-categories">' + cartes.join("") + '</div>' +
-    '<div class="quiz-notice">Les questions utilisent les contenus actuels des leçons, qui doivent encore être validés par un spécialiste.</div>');
+    '<div class="quiz-notice">Les questions utilisent les contenus actuels des leçons, qui doivent encore être validés par un spécialiste.</div>', "quiz");
 }
 function obtenirEntreesQuiz(choixLecon) {
   const source = choixLecon === -1
