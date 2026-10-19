@@ -123,7 +123,7 @@ function commencerApprentissage() {
   }
   masquerResultatsRecherche();
   document.getElementById("main").focus({ preventScroll: true });
-  speak();
+  speak(undefined, true);
 }
 function mettreAJourAccueil() {
   const nombreTotal = LECONS.reduce((total, lecon) => total + lecon.mots.filter(mot => mot.g).length, 0);
