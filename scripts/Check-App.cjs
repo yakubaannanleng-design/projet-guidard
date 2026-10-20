@@ -237,7 +237,8 @@ essayer("l’en-tête éditorial de la carte est rendu", () => {
   contexteRendu.show(1);
   const rendu = element("main").innerHTML;
   verifier("la carte indique la leçon", rendu.includes("card-lesson"));
-  verifier("la carte indique la position dans la leçon", /card-count">\s*2\s*\/\s*\d+/.test(rendu), rendu.slice(0, 400));
+  verifier("la carte indique la position dans la leçon", /card-count">[\s\S]{0,80}?2\s*\/\s*\d+/.test(rendu), rendu.slice(0, 400));
+  verifier("le compteur est explicite pour les lecteurs d’écran", /sr-only">Entrée\s*</.test(rendu));
 });
 
 console.log("\n" + reussis + " contrôle(s) réussi(s), " + echecs + " échec(s).");
