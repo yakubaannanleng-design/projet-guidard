@@ -16,6 +16,29 @@ L’espace **Quiz**, accessible depuis la barre du bas ou le menu, classe les pa
 
 Dans **Paramètres et accessibilité**, le thème clair ou sombre, la taille réglable du texte (85 à 120 %), le contraste, l’affichage des aides provisoires et la vitesse de lecture sont mémorisés sur l’appareil. Le bouton « Rétablir les réglages par défaut » permet d’annuler les personnalisations.
 
+## Charte visuelle
+
+L’interface suit une charte unique, déclarée en variables CSS dans `css/style.css`. Le début de la feuille conserve les règles historiques ; la section « GUIDARAPP — CHARTE VISUELLE » contient la charte en vigueur et prime sur les règles plus anciennes.
+
+| Jeton | Valeur | Usage |
+| --- | --- | --- |
+| `--app-bg` | `#f6f3ec` | fond papier chaud de l’application |
+| `--surface` | `#fffdf8` | cartes, panneaux, champ de recherche |
+| `--surface-muted` / `--surface-creux` | `#efeade` / `#e9e3d4` | aplats de second plan, pistes de progression |
+| `--accent` / `--accent-strong` | `#14624a` / `#0d4a37` | vert profond : actions, titres, mot Guidar |
+| `--or` / `--or-doux` | `#b8862b` | or hérité du Guidar : liserés, pastilles |
+| `--police-serif` | Georgia, Palatino | mot Guidar, titres éditoriaux, citations |
+| `--police-ui` | Inter, Segoe UI | interface |
+
+Les mêmes jetons sont redéfinis pour `body.theme-dark` et `body.contraste-renforce` : les deux modes restent disponibles et sont vérifiés par le contrôle automatique. La taille du texte se règle par `--taille-texte` (85 à 120 %), appliquée en fin de feuille. La préférence système `prefers-reduced-motion` neutralise les animations.
+
+Structure retenue :
+
+- l’en-tête est réduit au logo, au nom de l’application et à un badge « Guidar » ;
+- la scène du mot porte un en-tête éditorial `.card-head` : nom de la leçon à gauche, position dans la leçon à droite ;
+- la barre basse flotte au-dessus du bas de l’écran, et les superpositions (menu, clavier Guidar, messages) sont décalées pour ne jamais la recouvrir ;
+- le fond est un papier chaud traversé de deux halos diffus, et la scène du mot est encadrée d’un liseré or.
+
 ## Où modifier le programme
 
 - `guidar-final.html` : structure de la page et ordre de chargement des fichiers.

@@ -397,7 +397,8 @@ button{transition:background .18s ease,border-color .18s ease,color .18s ease,bo
 :focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
 
 /* Annonce lecteur d'écran : le mot et sa traduction seulement */
-.annonce{
+.annonce,
+.sr-only{
   position:absolute;width:1px;height:1px;padding:0;margin:-1px;
   overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0;
 }

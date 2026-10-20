@@ -47,7 +47,7 @@ function show(idx) {
   const enTeteCarte = `
     <div class="card-head">
       <span class="card-lesson">${echapperHtml(LECONS[leconIndex].titre)}</span>
-      <span class="card-count">${idx + 1} / ${mots.length}</span>
+      <span class="card-count"><span class="sr-only">Entrée </span>${idx + 1} / ${mots.length}</span>
     </div>`;
 
   // Fade out
