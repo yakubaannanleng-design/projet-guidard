@@ -1083,12 +1083,13 @@ body[data-section-window]:not([data-section-window="accueil"]) .home-dashboard{d
   .hdr-badge{display:none;}
   .search-area,.welcome-card,.home-dashboard,.main,.section-toolbar{width:calc(100% - 24px);}
   .search-area{margin:12px auto 10px;}
-  .welcome-card{display:block;padding:22px 20px;border-radius:22px;}
-  .welcome-card .start-button{width:100%;justify-content:center;margin-top:16px;}
+  .welcome-card{display:block;padding:20px 18px;border-radius:22px;}
+  .welcome-card .start-button{width:100%;justify-content:center;margin-top:14px;}
   .welcome-copy h1{font-size:22px;}
-  .welcome-quote{margin:12px 0 8px;padding-left:13px;font-size:15.5px;line-height:1.5;}
-  .welcome-description{font-size:12px;}
-  .home-dashboard{padding:15px 17px;}
+  .welcome-quote{margin:10px 0 8px;padding-left:13px;font-size:15.5px;line-height:1.5;}
+  .welcome-description{display:none;}
+  .welcome-progress{margin-top:9px;}
+  .home-dashboard{padding:14px 16px;}
   .dashboard-actions button{min-height:40px;padding:0 12px;font-size:12px;}
   .main{min-height:150px;border-radius:22px;padding:18px 16px;}
   .quiz-categories{gap:8px;}
@@ -1115,10 +1116,11 @@ body[data-section-window]:not([data-section-window="accueil"]) .home-dashboard{d
   .settings-row .theme-choice{width:118px;flex-basis:118px;}
   .quiz-score-value{font-size:44px;}
 }
-@media(max-height:700px){
+@media(max-height:880px){
   .search-area{margin:10px auto 8px;}
   .welcome-card{padding:16px 18px;}
   .welcome-quote{display:none;}
+  .welcome-copy h1{margin-top:9px;}
   .home-dashboard{padding:13px 16px;}
   .dashboard-progress{margin:9px 0 7px;}
   .dashboard-actions{margin-top:10px;}
