@@ -20,8 +20,25 @@ function propre(txt) {
 }
 
 function obtenirPhonetique(mot) {
-  if (!mot.p) return null;
-  return { texte: mot.p, provisoire: mot.pProvisoire === true };
+  if (!mot || !mot.g) return null;
+  // Une transcription déjà confirmée reste la référence. Les aides provisoires
+  // et les entrées sans transcription sont générées depuis l'orthographe Guidar.
+  if (mot.p && mot.pProvisoire !== true) {
+    return { texte: mot.p, provisoire: false };
+  }
+  return { texte: transcrirePhonetique(mot.g), provisoire: true };
+}
+
+function transcrirePhonetique(texte) {
+  return texte
+    .replace(/e/g, "é")
+    .replace(/E/g, "É")
+    .replace(/u/g, "ou")
+    .replace(/U/g, "Ou")
+    .replace(/ə/gi, "eu")
+    .replace(/ɗ/gi, "ndeu")
+    .replace(/ɓ/gi, "mbeu")
+    .replace(/ny/gi, "gn");
 }
 
 // ══════════════════════════════════════════════════

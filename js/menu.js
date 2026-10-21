@@ -398,7 +398,10 @@ function majResultatsBibliotheque(filtre, categorieChoisie) {
       const etatAudioTexte = audio.etat === "disponible"
         ? "enregistrement disponible"
         : audio.etat === "desaligne" ? "enregistrement à revérifier" : "enregistrement à venir";
-      return '<article class="resource-result"><div class="resource-result-heading"><div class="resource-guidar">' + echapperHtml(mot.g) + '</div><button type="button" class="resource-play" onclick="lireEntree(' + leconIndex + ',' + motIndex + ', null, true)" aria-label="Écouter ' + echapperHtml(mot.g) + ' et sa traduction ' + echapperHtml(mot.f) + '" title="Écouter le mot et sa traduction"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4z"/><path d="M17 9a5 5 0 0 1 0 6M19 6a9 9 0 0 1 0 12"/></svg></button></div><div class="resource-translation">' + echapperHtml(mot.f) + '</div><div class="resource-meta">' + echapperHtml(lecon.titre) + ' · ' + etatAudioTexte + (mot.pProvisoire ? ' · prononciation provisoire' : !mot.p ? ' · prononciation à compléter/valider' : '') + '</div></article>';
+      const phonTexte = obtenirPhonetique(mot).provisoire
+        ? " · prononciation approximative"
+        : " · prononciation confirmée";
+      return '<article class="resource-result"><div class="resource-result-heading"><div class="resource-guidar">' + echapperHtml(mot.g) + '</div><button type="button" class="resource-play" onclick="lireEntree(' + leconIndex + ',' + motIndex + ', null, true)" aria-label="Écouter ' + echapperHtml(mot.g) + ' et sa traduction ' + echapperHtml(mot.f) + '" title="Écouter le mot et sa traduction"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4z"/><path d="M17 9a5 5 0 0 1 0 6M19 6a9 9 0 0 1 0 12"/></svg></button></div><div class="resource-translation">' + echapperHtml(mot.f) + '</div><div class="resource-meta">' + echapperHtml(lecon.titre) + ' · ' + etatAudioTexte + phonTexte + '</div></article>';
     }).join("")
     : '<p class="module-note">Aucun résultat pour cette recherche. Essayez un autre mot ou un autre thème.</p>';
   if (compteur) compteur.textContent = entrees.length + " résultat(s)";
