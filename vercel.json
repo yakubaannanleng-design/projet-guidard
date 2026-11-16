@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "guidar-final.html", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/", "dest": "/guidar-final.html" },
+    { "src": "/css/(.*)", "headers": { "Cache-Control": "public, max-age=31536000, immutable" }, "dest": "/css/$1" },
+    { "src": "/js/(.*)", "headers": { "Cache-Control": "public, max-age=31536000, immutable" }, "dest": "/js/$1" },
+    { "src": "/images/(.*)", "headers": { "Cache-Control": "public, max-age=31536000, immutable" }, "dest": "/images/$1" },
+    { "src": "/audio_lecon(.*)", "headers": { "Cache-Control": "public, max-age=31536000, immutable" }, "dest": "/audio_lecon$1" },
+    { "src": "/(.*)", "handle": "filesystem" }
+  ]
+}
